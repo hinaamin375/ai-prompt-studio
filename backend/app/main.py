@@ -1,14 +1,67 @@
-from fastapi import FastAPI
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+from app.core.exceptions import ApplicationError
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.api.routes.health import router as health_router
 from app.core.config import settings
+from app.core.logging import configure_logging
+from app.db.session import engine
+
+configure_logging()
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    del app
+
+    logger.info("Starting %s", settings.app_name)
+
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+
+    logger.info("Database connection verified")
+
+    yield
+
+    logger.info("Stopping %s", settings.app_name)
+
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     debug=settings.debug,
+    lifespan=lifespan,
 )
+
+
+@app.exception_handler(ApplicationError)
+async def application_error_handler(
+    request: Request,
+    exc: ApplicationError,
+) -> JSONResponse:
+    logger.warning(
+        "Application error on %s: %s",
+        request.url.path,
+        exc.message,
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": exc.code,
+                "message": exc.message,
+            },
+        },
+    )
+
 
 app.add_middleware(
     CORSMiddleware,
