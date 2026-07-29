@@ -118,3 +118,78 @@ select {
     padding: 24px;
   }
 }
+.page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #172033;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary-button:hover {
+  background: #29364e;
+}
+
+.prompt-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.prompt-card {
+  display: flex;
+  min-height: 190px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px;
+  border: 1px solid #dde3ed;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.prompt-card h3 {
+  margin: 0 0 10px;
+}
+
+.prompt-card p {
+  color: #687386;
+  line-height: 1.5;
+}
+
+.prompt-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  color: #687386;
+  font-size: 0.875rem;
+}
+
+.prompt-card-footer a {
+  color: #5865d8;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .page-header-row {
+    flex-direction: column;
+  }
+}
