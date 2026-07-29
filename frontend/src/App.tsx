@@ -1,9 +1,12 @@
+import { BrowserRouter } from "react-router-dom";
+
+import { AppRoutes } from "./routes/AppRoutes";
+
 function App() {
   return (
-    <main>
-      <h1>AI Prompt Studio</h1>
-      <p>Build, test, compare, and govern AI prompts.</p>
-    </main>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
 
