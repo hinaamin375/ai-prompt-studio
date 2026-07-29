@@ -193,3 +193,92 @@ select {
     flex-direction: column;
   }
 }
+.editor-card {
+  max-width: 900px;
+  padding: 28px;
+  border: 1px solid #dde3ed;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.prompt-form {
+  display: grid;
+  gap: 24px;
+}
+
+.form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.form-field label {
+  font-weight: 700;
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd3df;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  line-height: 1.5;
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: #5865d8;
+  outline: 3px solid rgb(88 101 216 / 15%);
+}
+
+.field-help {
+  margin: 0;
+  color: #687386;
+  font-size: 0.875rem;
+}
+
+.field-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.875rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+.error-banner {
+  max-width: 900px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #f0b4ae;
+  border-radius: 8px;
+  background: #fff0ee;
+  color: #8f1d14;
+}
+
+.danger-button {
+  padding: 10px 16px;
+  border: 1px solid #d92d20;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #b42318;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.danger-button:hover {
+  background: #fff0ee;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
