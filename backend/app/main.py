@@ -2,17 +2,16 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-
-from app.core.exceptions import ApplicationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.api.routes.health import router as health_router
+from app.api.routes.prompts import router as prompts_router
 from app.core.config import settings
+from app.core.exceptions import ApplicationError
 from app.core.logging import configure_logging
 from app.db.session import engine
-from app.api.routes.prompts import router as prompts_router
 
 configure_logging()
 logger = logging.getLogger(__name__)
