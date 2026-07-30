@@ -1,23 +1,18 @@
 """
-Core Prompt Engine.
+Core Prompt Engine exports.
 
-The Prompt Engine is responsible for deterministic prompt analysis.
-
-This package contains no database logic,
-no API logic,
-and no AI provider logic.
-
-It is completely independent and reusable.
+The engine contains deterministic prompt-processing components. It has no
+database, HTTP, or AI-provider dependencies.
 """
 
 from .analyzer import PromptAnalyzer
 from .parser import PromptParser
 from .renderer import PromptRenderer
-from .statistics import PromptStatistics
+from .statistics import PromptStatisticsEngine
 
 __all__ = [
     "PromptAnalyzer",
     "PromptParser",
     "PromptRenderer",
-    "PromptStatistics",
+    "PromptStatisticsEngine",
 ]

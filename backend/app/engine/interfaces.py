@@ -1,79 +1,91 @@
 """
-Interfaces for the Prompt Engine.
+Abstract interfaces used by the Prompt Engine.
 
-These abstract classes define the contract that every
-engine implementation must follow.
+Concrete engine components implement these contracts. The analyzer depends
+on the interfaces rather than depending directly on particular
+implementations.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 
 from app.domain import PromptDocument
 from app.schemas.analysis import (
     PromptStatistics,
-    PromptVariable,
+    PromptVariableOccurrence,
 )
 
 
 class Parser(ABC):
-    """Base interface for prompt parsers."""
+    """
+    Contract for components that discover variables in prompt documents.
+    """
 
     @abstractmethod
     def parse(
         self,
         document: PromptDocument,
-    ) -> list[PromptVariable]:
+    ) -> list[PromptVariableOccurrence]:
         """
-        Parse a prompt.
+        Extract variable occurrences from a prompt document.
 
-        Parameters
-        ----------
-        document:
-            Prompt document to parse.
+        Args:
+            document:
+                Prompt document whose message contents should be parsed.
 
-        Returns
-        -------
-        list[PromptVariable]
-            List of parsed variables.
+        Returns:
+            A list containing every discovered variable occurrence.
         """
         raise NotImplementedError
 
 
 class Renderer(ABC):
-    """Base interface for prompt renderers."""
+    """
+    Contract for components that substitute prompt variables.
+    """
 
     @abstractmethod
     def render(
         self,
         document: PromptDocument,
-        variables: dict[str, str],
+        variables: Mapping[str, object],
     ) -> PromptDocument:
         """
-        Render a prompt.
+        Return a rendered copy of a prompt document.
 
-        Parameters
-        ----------
-        document:
-            Prompt document to render.
+        Args:
+            document:
+                Original prompt document.
 
-        variables:
-            Values to substitute.
+            variables:
+                Variable names mapped to replacement values.
 
-        Returns
-        -------
-        str
-            Rendered prompt.
+        Returns:
+            A new prompt document containing rendered message contents.
         """
         raise NotImplementedError
 
 
 class StatisticsProvider(ABC):
-    """Base interface for statistics engines."""
+    """
+    Contract for components that calculate prompt statistics.
+    """
 
     @abstractmethod
-    def analyze(self, document: PromptDocument) -> PromptStatistics:
+    def analyze(
+        self,
+        document: PromptDocument,
+    ) -> PromptStatistics:
         """
-        Calculate statistics for a prompt.
+        Calculate statistics for a prompt document.
+
+        Args:
+            document:
+                Prompt document whose message contents should be measured.
+
+        Returns:
+            Structured statistics for the complete document.
         """
         raise NotImplementedError

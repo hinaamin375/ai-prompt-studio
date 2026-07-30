@@ -1,40 +1,60 @@
 """
-Prompt Analyzer.
+Prompt analyzer orchestration component.
 
-Coordinates all Prompt Engine components.
+The analyzer coordinates the parser, renderer, and statistics provider. The
+actual orchestration logic will be implemented after those individual
+components are complete.
 """
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from app.domain import PromptDocument
 from app.schemas.analysis import PromptAnalysis
 
-from .parser import PromptParser
-from .renderer import PromptRenderer
-from .statistics import PromptStatistics
+from .interfaces import Parser, Renderer, StatisticsProvider
 
 
 class PromptAnalyzer:
     """
-    Main entry point into the Prompt Engine.
+    Main orchestration entry point for the Prompt Engine.
     """
 
     def __init__(
         self,
-        parser: PromptParser,
-        renderer: PromptRenderer,
-        statistics: PromptStatistics,
-    ):
-        self.parser = parser
-        self.renderer = renderer
-        self.statistics = statistics
+        parser: Parser,
+        renderer: Renderer,
+        statistics: StatisticsProvider,
+    ) -> None:
+        """
+        Initialize the analyzer with its required dependencies.
+
+        Args:
+            parser:
+                Component responsible for finding prompt variables.
+
+            renderer:
+                Component responsible for variable substitution.
+
+            statistics:
+                Component responsible for prompt measurements.
+        """
+        self._parser = parser
+        self._renderer = renderer
+        self._statistics = statistics
 
     def analyze(
         self,
         document: PromptDocument,
-        variables: dict[str, str] | None = None,
+        variables: Mapping[str, object] | None = None,
     ) -> PromptAnalysis:
         """
-        Analyze a prompt document.
+        Analyze a complete prompt document.
+
+        The implementation will be added after the parser and renderer have
+        been completed.
         """
-        raise NotImplementedError
+        raise NotImplementedError(
+            "Prompt analysis orchestration is not implemented yet."
+        )

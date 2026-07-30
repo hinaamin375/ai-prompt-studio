@@ -1,66 +1,80 @@
 """
-Schemas used by the Prompt Engine.
-"""
+Schemas returned by the Prompt Engine.
 
-from __future__ import annotations
+These Pydantic models define the structured output produced by prompt
+analysis components. They can also be returned directly from FastAPI
+endpoints.
+"""
 
 from pydantic import BaseModel, Field
 
 
-class PromptVariable(BaseModel):
+class PromptVariableOccurrence(BaseModel):
     """
-    Represents a variable discovered inside a prompt.
+    Represents one variable occurrence discovered inside a prompt.
+
+    The parser will use start and end positions later so that the frontend
+    can highlight variables inside the prompt editor.
     """
 
     name: str = Field(
         ...,
-        description="Variable name.",
+        min_length=1,
+        description="Name of the discovered prompt variable.",
         examples=["company"],
     )
 
     start: int = Field(
         ...,
-        description="Start index inside the prompt.",
+        ge=0,
+        description="Zero-based start position of the variable.",
     )
 
     end: int = Field(
         ...,
-        description="End index inside the prompt.",
+        ge=0,
+        description="Zero-based end position of the variable.",
     )
+
 
 class PromptStatistics(BaseModel):
     """
-    Statistics calculated from a prompt.
+    Measurements calculated from all messages in a prompt document.
     """
 
     characters: int = Field(
         ...,
         ge=0,
+        description="Total number of characters across all message contents.",
     )
 
     words: int = Field(
         ...,
         ge=0,
+        description="Total number of words across all message contents.",
     )
 
     lines: int = Field(
         ...,
         ge=0,
+        description="Total number of text lines across all message contents.",
     )
 
     estimated_tokens: int = Field(
         ...,
         ge=0,
+        description="Approximate number of language-model tokens.",
     )
+
 
 class PromptAnalysis(BaseModel):
     """
-    Complete analysis of a prompt.
+    Complete result returned by the prompt analyzer.
     """
 
     statistics: PromptStatistics
 
-    variables: list[PromptVariable] = Field(
+    variables: list[PromptVariableOccurrence] = Field(
         default_factory=list,
     )
 

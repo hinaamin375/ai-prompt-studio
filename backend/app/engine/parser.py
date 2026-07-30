@@ -1,26 +1,27 @@
 """
-Prompt Parser.
+Default prompt variable parser.
 
-Responsible for understanding prompt syntax.
+The implementation will be added in the next engine part.
 """
 
 from __future__ import annotations
+
+from app.domain import PromptDocument
+from app.schemas.analysis import PromptVariableOccurrence
 
 from .interfaces import Parser
 
 
 class PromptParser(Parser):
     """
-    Default parser implementation.
-
-    This class will eventually extract:
-
-    - variables
-    - placeholders
-    - prompt metadata
+    Discover template variables inside prompt message content.
     """
 
-    def parse(self, text: str):
-        raise NotImplementedError(
-            "Prompt parsing is not implemented yet."
-        )
+    def parse(
+        self,
+        document: PromptDocument,
+    ) -> list[PromptVariableOccurrence]:
+        """
+        Extract variable occurrences from a prompt document.
+        """
+        raise NotImplementedError("Prompt variable parsing is not implemented yet.")
