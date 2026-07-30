@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+from app.domain import PromptDocument
 from app.schemas.analysis import (
     PromptStatistics,
     PromptVariable,
@@ -20,16 +21,16 @@ class Parser(ABC):
 
     @abstractmethod
     def parse(
-    self,
-    text: str,
-) -> list[PromptVariable]:
+        self,
+        document: PromptDocument,
+    ) -> list[PromptVariable]:
         """
         Parse a prompt.
 
         Parameters
         ----------
-        text:
-            Raw prompt text.
+        document:
+            Prompt document to parse.
 
         Returns
         -------
@@ -45,16 +46,16 @@ class Renderer(ABC):
     @abstractmethod
     def render(
         self,
-        text: str,
+        document: PromptDocument,
         variables: dict[str, str],
-    ) -> str:
+    ) -> PromptDocument:
         """
         Render a prompt.
 
         Parameters
         ----------
-        text:
-            Prompt template.
+        document:
+            Prompt document to render.
 
         variables:
             Values to substitute.
@@ -71,7 +72,7 @@ class StatisticsProvider(ABC):
     """Base interface for statistics engines."""
 
     @abstractmethod
-    def analyze(self, text: str) -> PromptStatistics:
+    def analyze(self, document: PromptDocument) -> PromptStatistics:
         """
         Calculate statistics for a prompt.
         """

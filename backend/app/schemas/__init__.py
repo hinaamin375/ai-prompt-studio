@@ -1,5 +1,1 @@
-from .analysis import (
-    PromptAnalysis,
-    PromptStatistics,
-    PromptVariable
-)
+from .analysis import PromptAnalysis, PromptStatistics, PromptVariable

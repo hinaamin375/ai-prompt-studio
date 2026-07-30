@@ -6,6 +6,9 @@ Coordinates all Prompt Engine components.
 
 from __future__ import annotations
 
+from app.domain import PromptDocument
+from app.schemas.analysis import PromptAnalysis
+
 from .parser import PromptParser
 from .renderer import PromptRenderer
 from .statistics import PromptStatistics
@@ -26,19 +29,12 @@ class PromptAnalyzer:
         self.renderer = renderer
         self.statistics = statistics
 
-    from app.schemas.analysis import PromptAnalysis
-
     def analyze(
         self,
-        text: str,
+        document: PromptDocument,
         variables: dict[str, str] | None = None,
     ) -> PromptAnalysis:
         """
-        Analyze a prompt.
-
-        This method will coordinate all Prompt Engine
-        components.
-
-        It is intentionally left unimplemented for now.
+        Analyze a prompt document.
         """
         raise NotImplementedError
