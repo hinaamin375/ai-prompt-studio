@@ -8,14 +8,21 @@ engine implementation must follow.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+
+from app.schemas.analysis import (
+    PromptStatistics,
+    PromptVariable,
+)
 
 
 class Parser(ABC):
     """Base interface for prompt parsers."""
 
     @abstractmethod
-    def parse(self, text: str) -> Any:
+    def parse(
+    self,
+    text: str,
+) -> list[PromptVariable]:
         """
         Parse a prompt.
 
@@ -26,8 +33,8 @@ class Parser(ABC):
 
         Returns
         -------
-        Any
-            Parsed representation.
+        list[PromptVariable]
+            List of parsed variables.
         """
         raise NotImplementedError
 
@@ -64,7 +71,7 @@ class StatisticsProvider(ABC):
     """Base interface for statistics engines."""
 
     @abstractmethod
-    def analyze(self, text: str) -> Any:
+    def analyze(self, text: str) -> PromptStatistics:
         """
         Calculate statistics for a prompt.
         """

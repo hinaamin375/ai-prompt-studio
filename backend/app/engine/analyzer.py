@@ -25,3 +25,20 @@ class PromptAnalyzer:
         self.parser = parser
         self.renderer = renderer
         self.statistics = statistics
+
+    from app.schemas.analysis import PromptAnalysis
+
+    def analyze(
+        self,
+        text: str,
+        variables: dict[str, str] | None = None,
+    ) -> PromptAnalysis:
+        """
+        Analyze a prompt.
+
+        This method will coordinate all Prompt Engine
+        components.
+
+        It is intentionally left unimplemented for now.
+        """
+        raise NotImplementedError
