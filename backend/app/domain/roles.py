@@ -1,4 +1,3 @@
-
 """
 Prompt roles used throughout AI Prompt Studio.
 """

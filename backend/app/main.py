@@ -80,6 +80,7 @@ app.include_router(
     prefix=settings.api_v1_prefix,
 )
 
+
 @app.get("/", tags=["Root"])
 async def root() -> dict[str, str]:
     return {

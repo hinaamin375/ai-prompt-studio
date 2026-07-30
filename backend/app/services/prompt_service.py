@@ -59,9 +59,7 @@ class PromptService:
         )
 
         if "title" in update_data:
-            update_data["title"] = update_data[
-                "title"
-            ].strip()
+            update_data["title"] = update_data["title"].strip()
 
         for field, value in update_data.items():
             setattr(prompt, field, value)

@@ -32,6 +32,4 @@ def test_get_missing_prompt_returns_404() -> None:
 
     assert response.status_code == 404
 
-    assert response.json()["error"]["code"] == (
-        "prompt_not_found"
-    )
+    assert response.json()["error"]["code"] == ("prompt_not_found")
