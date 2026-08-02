@@ -69,7 +69,7 @@ class PromptStatistics(BaseModel):
 
 class PromptAnalysis(BaseModel):
     """
-    Complete result returned by the prompt analyzer.
+    Complete result returned by the Prompt Analyzer.
     """
 
     statistics: PromptStatistics
@@ -78,7 +78,14 @@ class PromptAnalysis(BaseModel):
         default_factory=list,
     )
 
-    preview: str = ""
+    rendered_document: str = Field(
+        default="",
+        description="Complete rendered prompt.",
+    )
+
+    missing_variables: list[str] = Field(
+        default_factory=list,
+    )
 
     warnings: list[str] = Field(
         default_factory=list,

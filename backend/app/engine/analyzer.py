@@ -1,9 +1,5 @@
 """
-Prompt analyzer orchestration component.
-
-The analyzer coordinates the parser, renderer, and statistics provider. The
-actual orchestration logic will be implemented after those individual
-components are complete.
+Prompt Analyzer.
 """
 
 from __future__ import annotations
@@ -13,12 +9,16 @@ from collections.abc import Mapping
 from app.domain import PromptDocument
 from app.schemas.analysis import PromptAnalysis
 
-from .interfaces import Parser, Renderer, StatisticsProvider
+from .interfaces import (
+    Parser,
+    Renderer,
+    StatisticsProvider,
+)
 
 
 class PromptAnalyzer:
     """
-    Main orchestration entry point for the Prompt Engine.
+    Coordinates the Prompt Engine.
     """
 
     def __init__(
@@ -26,20 +26,7 @@ class PromptAnalyzer:
         parser: Parser,
         renderer: Renderer,
         statistics: StatisticsProvider,
-    ) -> None:
-        """
-        Initialize the analyzer with its required dependencies.
-
-        Args:
-            parser:
-                Component responsible for finding prompt variables.
-
-            renderer:
-                Component responsible for variable substitution.
-
-            statistics:
-                Component responsible for prompt measurements.
-        """
+    ):
         self._parser = parser
         self._renderer = renderer
         self._statistics = statistics
@@ -49,12 +36,40 @@ class PromptAnalyzer:
         document: PromptDocument,
         variables: Mapping[str, object] | None = None,
     ) -> PromptAnalysis:
-        """
-        Analyze a complete prompt document.
 
-        The implementation will be added after the parser and renderer have
-        been completed.
-        """
-        raise NotImplementedError(
-            "Prompt analysis orchestration is not implemented yet."
+        variables = variables or {}
+
+        occurrences = self._parser.parse(document)
+
+        rendered_document = self._renderer.render(
+            document,
+            variables,
+        )
+
+        stats = self._statistics.analyze(rendered_document)
+
+        missing = sorted(
+            {
+                variable.name
+                for variable in occurrences
+                if variable.name not in variables
+            }
+        )
+
+        rendered_text = "\n\n".join(
+            message.content for message in rendered_document.messages
+        )
+
+        warnings: list[str] = []
+
+        if stats.estimated_tokens > 8000:
+            warnings.append("Prompt exceeds approximately 8000 tokens.")
+
+        return PromptAnalysis(
+            statistics=stats,
+            variables=occurrences,
+            rendered_document=rendered_text,
+            missing_variables=missing,
+            warnings=warnings,
+            errors=[],
         )
