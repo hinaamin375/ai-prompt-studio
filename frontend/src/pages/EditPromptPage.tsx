@@ -14,6 +14,7 @@ import {
   getPrompt,
   updatePrompt,
 } from "../api/prompts";
+import { AnalyzeTestButton } from "../features/analysis";
 import { PromptForm } from "../features/prompts/PromptForm";
 import type {
   PromptCreate,
@@ -34,9 +35,8 @@ export function EditPromptPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (
-      data: PromptUpdate,
-    ) => updatePrompt(promptId, data),
+    mutationFn: (data: PromptUpdate) =>
+      updatePrompt(promptId, data),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -98,6 +98,7 @@ export function EditPromptPage() {
     return (
       <div className="card">
         <h2>Prompt not found</h2>
+
         <Link to="/prompts">
           Return to prompt library
         </Link>
@@ -111,7 +112,8 @@ export function EditPromptPage() {
       promptQuery.data.description ?? "",
     system_prompt:
       promptQuery.data.system_prompt ?? "",
-    user_prompt: promptQuery.data.user_prompt,
+    user_prompt:
+      promptQuery.data.user_prompt,
   };
 
   return (
@@ -119,9 +121,11 @@ export function EditPromptPage() {
       <header className="page-header page-header-row">
         <div>
           <p className="eyebrow">
-            Prompt management
+            Prompt Management
           </p>
+
           <h2>Edit Prompt</h2>
+
           <p>
             Update or delete this prompt.
           </p>
@@ -135,12 +139,15 @@ export function EditPromptPage() {
         >
           {deleteMutation.isPending
             ? "Deleting..."
-            : "Delete prompt"}
+            : "Delete Prompt"}
         </button>
       </header>
 
       {updateMutation.isError && (
-        <div role="alert" className="error-banner">
+        <div
+          role="alert"
+          className="error-banner"
+        >
           Changes could not be saved.
         </div>
       )}
@@ -148,11 +155,24 @@ export function EditPromptPage() {
       <div className="editor-card">
         <PromptForm
           initialValues={initialValues}
-          submitLabel="Save changes"
+          submitLabel="Save Changes"
           isSubmitting={
             updateMutation.isPending
           }
           onSubmit={handleUpdate}
+        />
+      </div>
+
+      <div className="card analysis-test-card">
+        <h3>Prompt Analysis</h3>
+
+        <p>
+          Analyze this saved prompt using the
+          Prompt Engine.
+        </p>
+
+        <AnalyzeTestButton
+          promptId={promptId}
         />
       </div>
     </section>
