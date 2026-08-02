@@ -68,7 +68,7 @@ class PromptAnalyzer:
         return PromptAnalysis(
             statistics=stats,
             variables=occurrences,
-            rendered_document=rendered_text,
+            rendered_document=rendered_document,
             missing_variables=missing,
             warnings=warnings,
             errors=[],

@@ -4,6 +4,7 @@ Pydantic schemas used by the API and Prompt Engine.
 
 from .analysis import (
     PromptAnalysis,
+    PromptAnalyzeRequest,
     PromptStatistics,
     PromptVariableOccurrence,
 )
@@ -15,9 +16,10 @@ from .prompt import (
 
 __all__ = [
     "PromptAnalysis",
-    "PromptStatistics",
-    "PromptVariableOccurrence",
+    "PromptAnalyzeRequest",
     "PromptCreate",
     "PromptResponse",
+    "PromptStatistics",
     "PromptUpdate",
+    "PromptVariableOccurrence",
 ]

@@ -4,10 +4,17 @@ from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.schemas.analysis import (
+    PromptAnalysis,
+    PromptAnalyzeRequest,
+)
 from app.schemas.prompt import (
     PromptCreate,
     PromptResponse,
     PromptUpdate,
+)
+from app.services.prompt_analysis_service import (
+    prompt_analysis_service,
 )
 from app.services.prompt_service import prompt_service
 
@@ -42,6 +49,25 @@ def list_prompts(
     db: DatabaseSession,
 ) -> list[PromptResponse]:
     return prompt_service.list_prompts(db)
+
+
+@router.post(
+    "/{prompt_id}/analyze",
+    response_model=PromptAnalysis,
+)
+def analyze_prompt(
+    prompt_id: int,
+    data: PromptAnalyzeRequest,
+    db: DatabaseSession,
+) -> PromptAnalysis:
+    """
+    Analyze a saved prompt using optional variable values.
+    """
+    return prompt_analysis_service.analyze_prompt(
+        db=db,
+        prompt_id=prompt_id,
+        variables=data.variables,
+    )
 
 
 @router.get(

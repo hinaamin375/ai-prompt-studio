@@ -1,5 +1,5 @@
 """
-Business domain models.
+Business domain models used by the Prompt Engine.
 """
 
 from .message import PromptMessage

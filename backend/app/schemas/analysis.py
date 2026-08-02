@@ -6,7 +6,11 @@ analysis components. They can also be returned directly from FastAPI
 endpoints.
 """
 
+from typing import Any
+
 from pydantic import BaseModel, Field
+
+from app.domain.prompt import PromptDocument
 
 
 class PromptVariableOccurrence(BaseModel):
@@ -78,10 +82,7 @@ class PromptAnalysis(BaseModel):
         default_factory=list,
     )
 
-    rendered_document: str = Field(
-        default="",
-        description="Complete rendered prompt.",
-    )
+    rendered_document: PromptDocument | None = None
 
     missing_variables: list[str] = Field(
         default_factory=list,
@@ -93,4 +94,19 @@ class PromptAnalysis(BaseModel):
 
     errors: list[str] = Field(
         default_factory=list,
+    )
+class PromptAnalyzeRequest(BaseModel):
+    """
+    Variable values supplied when analyzing a saved prompt.
+    """
+
+    variables: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Placeholder names mapped to rendering values.",
+        examples=[
+            {
+                "company": "BP",
+                "quarter": "Q2",
+            }
+        ],
     )
