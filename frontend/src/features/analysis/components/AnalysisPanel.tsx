@@ -1,6 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { useMutation } from "@tanstack/react-query";
+
+import type { Prompt } from "../../../types/prompt";
 
 import { analyzePrompt } from "../api/analysis";
 import type {
@@ -9,14 +15,8 @@ import type {
 } from "../types/analysis";
 import { extractVariables } from "../utils/extractVariables";
 
-import { MissingVariableList } from "./MissingVariableList";
-import { RenderedPrompt } from "./RenderedPrompt";
-import { StatisticsCards } from "./StatisticsCards";
+import { AnalysisResult } from "./AnalysisResult";
 import { VariableForm } from "./VariableForm";
-import { VariableList } from "./VariableList";
-import { WarningList } from "./WarningList";
-
-import type { Prompt } from "../../../types/prompt";
 
 interface AnalysisPanelProps {
   prompt: Prompt;
@@ -32,7 +32,10 @@ export function AnalysisPanel({
     ].join("\n");
 
     return extractVariables(combinedPrompt);
-  }, [prompt]);
+  }, [
+    prompt.system_prompt,
+    prompt.user_prompt,
+  ]);
 
   const [variableValues, setVariableValues] =
     useState<Record<string, string>>({});
@@ -50,6 +53,15 @@ export function AnalysisPanel({
     });
   }, [variableNames]);
 
+  const analysisMutation = useMutation<
+    PromptAnalysis,
+    Error,
+    AnalyzePromptRequest
+  >({
+    mutationFn: (request) =>
+      analyzePrompt(prompt.id, request),
+  });
+
   function handleVariableChange(
     variableName: string,
     value: string,
@@ -60,24 +72,15 @@ export function AnalysisPanel({
     }));
   }
 
-  const analysisMutation = useMutation<
-    PromptAnalysis,
-    Error,
-    AnalyzePromptRequest
-  >({
-    mutationFn: (request) =>
-      analyzePrompt(prompt.id, request),
-  });
-
-  async function handleAnalyze() {
-    await analysisMutation.mutateAsync({
+  function handleAnalyze(): void {
+    analysisMutation.mutate({
       variables: variableValues,
     });
   }
 
   return (
     <section className="analysis-panel">
-      <div className="analysis-panel-header">
+      <header className="analysis-panel-header">
         <div>
           <p className="eyebrow">
             Prompt Engine
@@ -90,29 +93,16 @@ export function AnalysisPanel({
             analyze the rendered prompt.
           </p>
         </div>
-      </div>
+      </header>
 
-     <VariableForm
-  variableNames={variableNames}
-  values={variableValues}
-  onChange={handleVariableChange}
-  onAnalyze={handleAnalyze}
-  isAnalyzing={analysisMutation.isPending}
-  disabled={analysisMutation.isPending}
-/>
-
-      {/* <div className="analysis-actions">
-        <button
-          type="button"
-          className="primary-button"
-          disabled={analysisMutation.isPending}
-          onClick={handleAnalyze}
-        >
-          {analysisMutation.isPending
-            ? "Analyzing..."
-            : "Analyze Prompt"}
-        </button>
-      </div> */}
+      <VariableForm
+        variableNames={variableNames}
+        values={variableValues}
+        onChange={handleVariableChange}
+        onAnalyze={handleAnalyze}
+        isAnalyzing={analysisMutation.isPending}
+        disabled={analysisMutation.isPending}
+      />
 
       {analysisMutation.isError && (
         <div
@@ -123,58 +113,22 @@ export function AnalysisPanel({
         </div>
       )}
 
-      {/* {analysisMutation.data && (
-        <pre
-          style={{
-            marginTop: "20px",
-            overflow: "auto",
-            background: "#111827",
-            color: "#ffffff",
-            padding: "16px",
-            borderRadius: "8px",
-            fontSize: "0.875rem",
-          }}
+      {analysisMutation.isSuccess && (
+        <div
+          role="status"
+          className="analysis-complete-banner"
         >
-          {JSON.stringify(
-            analysisMutation.data,
-            null,
-            2,
-          )}
-        </pre>
-      )} */}
+          <span className="status-icon">
+            ✓
+          </span>
 
-   <div className="analysis-results-grid">
-  <RenderedPrompt
-    document={analysisMutation.data?.rendered_document}
-  />
+          Analysis completed successfully.
+        </div>
+      )}
 
-  <StatisticsCards
-    statistics={analysisMutation.data?.statistics}
-  />
-
-  <VariableList
-    variables={analysisMutation.data?.variables}
-  />
-
- <MissingVariableList
-    missingVariables={
-        analysisMutation.data?.missing_variables
-    }
-    hasAnalysis={
-        Boolean(analysisMutation.data)
-    }
-/>
-
-  <div className="analysis-results-full">
-    <WarningList
-    warnings={analysisMutation.data?.warnings}
-    errors={analysisMutation.data?.errors}
-    hasAnalysis={
-        Boolean(analysisMutation.data)
-    }
-/>
-  </div>
-</div>
+      <AnalysisResult
+        analysis={analysisMutation.data}
+      />
     </section>
   );
 }

@@ -1,30 +1,86 @@
 import { useState } from "react";
 
-import { PromptSelector } from "./PromptSelector";
-import { usePrompts } from "../../prompts/hooks/usePrompts";
+import type { Prompt } from "../../../types/prompt";
+
+import { PromptSelectionPanel } from "./PromptSelectionPanel";
+import { ComparisonResults } from "./ComparisonResults";
+
+import { useComparePrompts } from "../hooks/useComparePrompts";
+
+export interface PromptSelection {
+  promptId?: number;
+  variables: Record<string, string>;
+}
+
+interface PromptComparisonPanelProps {
+  prompts: Prompt[];
+}
 
 export function PromptComparisonPanel({
-  title,
-}: {
-  title: string;
-}) {
-  const { data: prompts = [] } = usePrompts();
+  prompts,
+}: PromptComparisonPanelProps) {
+  const [left, setLeft] = useState<PromptSelection>({
+    variables: {},
+  });
 
-  const [selectedPromptId, setSelectedPromptId] =
-    useState<number>();
+  const [right, setRight] = useState<PromptSelection>({
+    variables: {},
+  });
+
+  const compareMutation = useComparePrompts();
+
+  const canCompare =
+    left.promptId !== undefined &&
+    right.promptId !== undefined;
+
+  function compare() {
+    if (!canCompare) {
+      return;
+    }
+
+    compareMutation.mutate({
+      left_prompt_id: left.promptId!,
+      right_prompt_id: right.promptId!,
+      left_variables: left.variables,
+      right_variables: right.variables,
+    });
+  }
 
   return (
-    <section className="comparison-column">
-      <h2>{title}</h2>
+    <>
+      <div className="comparison-layout">
+        <PromptSelectionPanel
+          title="Prompt A"
+          prompts={prompts}
+          selection={left}
+          onChange={setLeft}
+        />
 
-      <PromptSelector
-        label="Prompt"
-        prompts={prompts}
-        value={selectedPromptId}
-        onChange={setSelectedPromptId}
-      />
+        <PromptSelectionPanel
+          title="Prompt B"
+          prompts={prompts}
+          selection={right}
+          onChange={setRight}
+        />
+      </div>
 
-      <p>Select a prompt to continue.</p>
-    </section>
+      <div className="comparison-actions">
+        <button
+          className="primary-button"
+          disabled={!canCompare || compareMutation.isPending}
+          onClick={compare}
+        >
+          {compareMutation.isPending
+            ? "Comparing..."
+            : "Compare Prompts"}
+        </button>
+      </div>
+
+      {compareMutation.data && (
+        <ComparisonResults
+          comparison={compareMutation.data}
+        />
+      )}
+    </>
   );
 }
