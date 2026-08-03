@@ -14,7 +14,7 @@ import {
   getPrompt,
   updatePrompt,
 } from "../api/prompts";
-import { AnalyzeTestButton } from "../features/analysis";
+import { AnalysisPanel } from "../features/analysis";
 import { PromptForm } from "../features/prompts/PromptForm";
 import type {
   PromptCreate,
@@ -171,9 +171,9 @@ export function EditPromptPage() {
           Prompt Engine.
         </p>
 
-        <AnalyzeTestButton
-          promptId={promptId}
-        />
+      <AnalysisPanel
+  prompt={promptQuery.data}
+/>
       </div>
     </section>
   );
