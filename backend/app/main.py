@@ -83,7 +83,10 @@ app.include_router(
     prompts_router,
     prefix=settings.api_v1_prefix,
 )
-app.include_router(comparisons_router)
+app.include_router(
+    comparisons_router,
+    prefix="/api/v1",
+)
 
 
 @app.get("/", tags=["Root"])
