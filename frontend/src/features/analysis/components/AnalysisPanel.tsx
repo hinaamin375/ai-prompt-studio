@@ -92,14 +92,16 @@ export function AnalysisPanel({
         </div>
       </div>
 
-      <VariableForm
-        variableNames={variableNames}
-        values={variableValues}
-        onChange={handleVariableChange}
-        disabled={analysisMutation.isPending}
-      />
+     <VariableForm
+  variableNames={variableNames}
+  values={variableValues}
+  onChange={handleVariableChange}
+  onAnalyze={handleAnalyze}
+  isAnalyzing={analysisMutation.isPending}
+  disabled={analysisMutation.isPending}
+/>
 
-      <div className="analysis-actions">
+      {/* <div className="analysis-actions">
         <button
           type="button"
           className="primary-button"
@@ -110,7 +112,7 @@ export function AnalysisPanel({
             ? "Analyzing..."
             : "Analyze Prompt"}
         </button>
-      </div>
+      </div> */}
 
       {analysisMutation.isError && (
         <div
@@ -141,28 +143,38 @@ export function AnalysisPanel({
         </pre>
       )} */}
 
-     <RenderedPrompt
-  document={analysisMutation.data?.rendered_document}
-/>
+   <div className="analysis-results-grid">
+  <RenderedPrompt
+    document={analysisMutation.data?.rendered_document}
+  />
 
-     <StatisticsCards
-  statistics={analysisMutation.data?.statistics}
-/>
+  <StatisticsCards
+    statistics={analysisMutation.data?.statistics}
+  />
 
-    <VariableList
+  <VariableList
     variables={analysisMutation.data?.variables}
-/>
+  />
 
-     <MissingVariableList
+ <MissingVariableList
     missingVariables={
         analysisMutation.data?.missing_variables
     }
+    hasAnalysis={
+        Boolean(analysisMutation.data)
+    }
 />
 
-     <WarningList
+  <div className="analysis-results-full">
+    <WarningList
     warnings={analysisMutation.data?.warnings}
     errors={analysisMutation.data?.errors}
+    hasAnalysis={
+        Boolean(analysisMutation.data)
+    }
 />
+  </div>
+</div>
     </section>
   );
 }

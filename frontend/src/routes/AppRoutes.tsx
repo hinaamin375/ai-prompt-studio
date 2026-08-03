@@ -1,7 +1,8 @@
 import { Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "../components/layout/AppLayout";
-import { ComparisonsPage } from "../pages/ComparisonsPage";
+import ComparisonsPage
+from "../pages/ComparisonsPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { PromptsPage } from "../pages/PromptsPage";

@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type { RenderedDocument } from "../types/analysis";
 
 interface RenderedPromptProps {
@@ -7,12 +9,47 @@ interface RenderedPromptProps {
 export function RenderedPrompt({
   document,
 }: RenderedPromptProps) {
+  const text = useMemo(() => {
+    if (!document) {
+      return "";
+    }
+
+    return document.messages
+      .map(
+        (message) =>
+          `${message.role.toUpperCase()}\n\n${message.content}`,
+      )
+      .join("\n\n----------------------------\n\n");
+  }, [document]);
+
+  async function handleCopy() {
+    if (!text) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(text);
+  }
+
   return (
     <section className="analysis-card">
-      <h3>Rendered Prompt</h3>
+      <div className="analysis-card-header">
+        <h3>Rendered Prompt</h3>
+
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={handleCopy}
+          disabled={!document}
+        >
+          📋 Copy
+        </button>
+      </div>
 
       {!document ? (
-        <p>No rendered prompt yet.</p>
+        <div className="analysis-empty-state">
+          Click <strong>Analyze Prompt</strong> to
+          generate a rendered prompt.
+        </div>
       ) : (
         <div className="rendered-document">
           {document.messages.map((message, index) => (

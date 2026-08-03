@@ -1,25 +1,45 @@
 interface MissingVariableListProps {
   missingVariables?: string[];
+  hasAnalysis?: boolean;
 }
 
 export function MissingVariableList({
-  missingVariables,
+  missingVariables = [],
+  hasAnalysis = false,
 }: MissingVariableListProps) {
   return (
     <section className="analysis-card">
       <h3>Missing Variables</h3>
 
-      {!missingVariables ||
-      missingVariables.length === 0 ? (
-        <p>None 🎉</p>
+      {!hasAnalysis ? (
+        <div className="analysis-empty-state">
+          Run an analysis to check for missing
+          variables.
+        </div>
+      ) : missingVariables.length === 0 ? (
+        <div className="analysis-success-state">
+          <span className="status-icon">
+            ✓
+          </span>
+
+          <div>
+            <strong>
+              All variables supplied
+            </strong>
+
+            <p>
+              Every detected variable has a value.
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="variable-list">
-          {missingVariables.map((name) => (
+          {missingVariables.map((variable) => (
             <div
-              key={name}
+              key={variable}
               className="missing-chip"
             >
-              {name}
+              {`{{${variable}}}`}
             </div>
           ))}
         </div>

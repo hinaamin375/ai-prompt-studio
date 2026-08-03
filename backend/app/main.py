@@ -12,7 +12,11 @@ from app.core.config import settings
 from app.core.exceptions import ApplicationError
 from app.core.logging import configure_logging
 from app.db.session import engine
-
+from app.api.routes import (
+    comparisons_router,
+    health_router,
+    prompts_router,
+)
 configure_logging()
 logger = logging.getLogger(__name__)
 
@@ -79,6 +83,7 @@ app.include_router(
     prompts_router,
     prefix=settings.api_v1_prefix,
 )
+app.include_router(comparisons_router)
 
 
 @app.get("/", tags=["Root"])

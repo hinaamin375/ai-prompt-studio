@@ -5,6 +5,8 @@ interface VariableFormProps {
     variableName: string,
     value: string,
   ) => void;
+  onAnalyze: () => void;
+  isAnalyzing: boolean;
   disabled?: boolean;
 }
 
@@ -22,6 +24,8 @@ export function VariableForm({
   variableNames,
   values,
   onChange,
+  onAnalyze,
+  isAnalyzing,
   disabled = false,
 }: VariableFormProps) {
   return (
@@ -31,8 +35,8 @@ export function VariableForm({
           <h3>Variables</h3>
 
           <p>
-            Enter values for the variables detected in
-            this prompt.
+            Enter values for every detected
+            template variable.
           </p>
         </div>
 
@@ -43,41 +47,74 @@ export function VariableForm({
 
       {variableNames.length === 0 ? (
         <div className="analysis-empty-state">
-          No template variables were detected.
+          No template variables detected.
         </div>
       ) : (
-        <div className="analysis-variable-grid">
-          {variableNames.map((variableName) => {
-            const inputId = `analysis-variable-${variableName}`;
+        <>
+          <div className="analysis-variable-grid">
+            {variableNames.map((variableName) => {
+              const inputId =
+                `analysis-variable-${variableName}`;
 
-            return (
-              <div
-                className="analysis-variable-field"
-                key={variableName}
-              >
-                <label htmlFor={inputId}>
-                  {formatVariableLabel(variableName)}
-                </label>
-
-                <input
-                  id={inputId}
-                  type="text"
-                  value={values[variableName] ?? ""}
-                  placeholder={`Enter ${variableName}`}
-                  disabled={disabled}
-                  onChange={(event) =>
-                    onChange(
+              return (
+                <div
+                  key={variableName}
+                  className="analysis-variable-field"
+                >
+                  <label htmlFor={inputId}>
+                    {formatVariableLabel(
                       variableName,
-                      event.target.value,
-                    )
-                  }
-                />
+                    )}
+                  </label>
 
-                <code>{`{{${variableName}}}`}</code>
-              </div>
-            );
-          })}
-        </div>
+                  <input
+                    id={inputId}
+                    type="text"
+                    value={
+                      values[variableName] ?? ""
+                    }
+                    disabled={disabled}
+                    placeholder={`Enter ${variableName}`}
+                    onChange={(event) =>
+                      onChange(
+                        variableName,
+                        event.target.value,
+                      )
+                    }
+                  />
+
+                  <code>
+                    {`{{${variableName}}}`}
+                  </code>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="analysis-variable-actions">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={onAnalyze}
+              disabled={
+                disabled || isAnalyzing
+              }
+            >
+              {isAnalyzing ? (
+                <>
+                  <span
+                    className="button-spinner"
+                    aria-hidden="true"
+                  />
+
+                  Analyzing...
+                </>
+              ) : (
+                "Analyze Prompt"
+              )}
+            </button>
+          </div>
+        </>
       )}
     </section>
   );
