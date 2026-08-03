@@ -145,13 +145,24 @@ export function AnalysisPanel({
   document={analysisMutation.data?.rendered_document}
 />
 
-      <StatisticsCards />
+     <StatisticsCards
+  statistics={analysisMutation.data?.statistics}
+/>
 
-      <VariableList />
+    <VariableList
+    variables={analysisMutation.data?.variables}
+/>
 
-      <MissingVariableList />
+     <MissingVariableList
+    missingVariables={
+        analysisMutation.data?.missing_variables
+    }
+/>
 
-      <WarningList />
+     <WarningList
+    warnings={analysisMutation.data?.warnings}
+    errors={analysisMutation.data?.errors}
+/>
     </section>
   );
 }

@@ -1,9 +1,29 @@
-export function MissingVariableList() {
+interface MissingVariableListProps {
+  missingVariables?: string[];
+}
+
+export function MissingVariableList({
+  missingVariables,
+}: MissingVariableListProps) {
   return (
-    <div className="analysis-card">
+    <section className="analysis-card">
       <h3>Missing Variables</h3>
 
-      <p>No missing variables.</p>
-    </div>
+      {!missingVariables ||
+      missingVariables.length === 0 ? (
+        <p>None 🎉</p>
+      ) : (
+        <div className="variable-list">
+          {missingVariables.map((name) => (
+            <div
+              key={name}
+              className="missing-chip"
+            >
+              {name}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
