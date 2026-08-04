@@ -3,6 +3,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
+import { NotificationProvider } from "../components/notifications/NotificationProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,6 +19,7 @@ export function AppProviders({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
+      <NotificationProvider />
     </QueryClientProvider>
   );
 }

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { createPrompt } from "../api/prompts";
 import { PromptForm } from "../features/prompts/PromptForm";
 import type { PromptCreate } from "../types/prompt";
+import { toast } from "sonner";
 
 export function NewPromptPage() {
   const navigate = useNavigate();
@@ -11,13 +12,22 @@ export function NewPromptPage() {
 
   const createMutation = useMutation({
     mutationFn: createPrompt,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["prompts"],
-      });
 
-      navigate("/prompts");
-    },
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["prompts"],
+    });
+
+    toast.success("Prompt created successfully");
+
+    navigate("/prompts");
+  },
+
+  onError: () => {
+    toast.error("Could not create prompt", {
+      description: "Please check the form and try again.",
+    });
+  },
   });
 
   async function handleSubmit(

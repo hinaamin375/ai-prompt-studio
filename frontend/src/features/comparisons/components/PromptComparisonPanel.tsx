@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { toast } from "sonner";
 import type { Prompt } from "../../../types/prompt";
 
 import { PromptSelectionPanel } from "./PromptSelectionPanel";
@@ -35,6 +35,7 @@ export function PromptComparisonPanel({
 
   function compare() {
     if (!canCompare) {
+         toast.error("Select two prompts first");
       return;
     }
 
@@ -43,6 +44,18 @@ export function PromptComparisonPanel({
       right_prompt_id: right.promptId!,
       left_variables: left.variables,
       right_variables: right.variables,
+    },
+    {
+      onSuccess: () => {
+        toast.success("Prompt comparison completed");
+      },
+
+      onError: () => {
+        toast.error("Prompt comparison failed", {
+          description:
+            "Check both prompts and variable values.",
+        });
+      },
     });
   }
 

@@ -9,6 +9,8 @@ import { ComparisonSummary } from "./ComparisonSummary";
 import { SimilarityCard } from "./SimilarityCard";
 import { VariableComparison } from "./VariableComparison";
 import { PromptDiff } from "./PromptDiff";
+import { CopyComparisonButton } from "./CopyComparisonButton";
+import { DownloadComparisonButton } from "./DownloadComparisonButton";
 
 interface ComparisonResultsProps {
   comparison: PromptComparisonResponse;
@@ -22,6 +24,15 @@ export function ComparisonResults({
       <SimilarityCard
         similarity={comparison.summary.similarity}
       />
+       <div className="comparison-toolbar">
+    <CopyComparisonButton
+        comparison={comparison}
+    />
+
+    <DownloadComparisonButton
+        comparison={comparison}
+    />
+</div>
 
       <ComparisonSummary
         summary={comparison.summary}

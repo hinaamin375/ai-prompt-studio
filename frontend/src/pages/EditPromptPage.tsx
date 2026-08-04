@@ -20,6 +20,7 @@ import type {
   PromptCreate,
   PromptUpdate,
 } from "../types/prompt";
+import { toast } from "sonner";
 
 export function EditPromptPage() {
   const params = useParams();
@@ -35,32 +36,48 @@ export function EditPromptPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: PromptUpdate) =>
-      updatePrompt(promptId, data),
+   mutationFn: (data: PromptUpdate) =>
+    updatePrompt(promptId, data),
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["prompts"],
-      });
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["prompts"],
+    });
 
-      await queryClient.invalidateQueries({
-        queryKey: ["prompts", promptId],
-      });
+    await queryClient.invalidateQueries({
+      queryKey: ["prompts", promptId],
+    });
 
-      navigate("/prompts");
-    },
+    toast.success("Prompt updated successfully");
+
+    navigate("/prompts");
+  },
+
+  onError: () => {
+    toast.error("Could not update prompt", {
+      description: "Please try again.",
+    });
+  },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => deletePrompt(promptId),
+   mutationFn: () => deletePrompt(promptId),
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["prompts"],
-      });
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["prompts"],
+    });
 
-      navigate("/prompts");
-    },
+    toast.success("Prompt deleted successfully");
+
+    navigate("/prompts");
+  },
+
+  onError: () => {
+    toast.error("Could not delete prompt", {
+      description: "Please try again.",
+    });
+  },
   });
 
   async function handleUpdate(
@@ -81,6 +98,7 @@ export function EditPromptPage() {
     );
 
     if (!confirmed) {
+       toast.info("Prompt deletion cancelled");
       return;
     }
 
@@ -143,14 +161,6 @@ export function EditPromptPage() {
         </button>
       </header>
 
-      {updateMutation.isError && (
-        <div
-          role="alert"
-          className="error-banner"
-        >
-          Changes could not be saved.
-        </div>
-      )}
 
       <div className="editor-card">
         <PromptForm

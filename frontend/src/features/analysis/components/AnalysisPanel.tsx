@@ -3,7 +3,7 @@ import {
   useMemo,
   useState,
 } from "react";
-
+import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 
 import type { Prompt } from "../../../types/prompt";
@@ -58,8 +58,19 @@ export function AnalysisPanel({
     Error,
     AnalyzePromptRequest
   >({
-    mutationFn: (request) =>
-      analyzePrompt(prompt.id, request),
+  mutationFn: (request) =>
+    analyzePrompt(prompt.id, request),
+
+  onSuccess: () => {
+    toast.success("Prompt analysis completed");
+  },
+
+  onError: () => {
+    toast.error("Prompt analysis failed", {
+      description:
+        "Check the prompt variables and try again.",
+    });
+  },
   });
 
   function handleVariableChange(
@@ -104,14 +115,7 @@ export function AnalysisPanel({
         disabled={analysisMutation.isPending}
       />
 
-      {analysisMutation.isError && (
-        <div
-          role="alert"
-          className="error-banner"
-        >
-          Analysis failed. Please try again.
-        </div>
-      )}
+      
 
       {analysisMutation.isSuccess && (
         <div
