@@ -4,6 +4,8 @@ Business logic for comparing two saved prompts.
 
 from __future__ import annotations
 
+from difflib import SequenceMatcher
+
 from sqlalchemy.orm import Session
 
 from app.schemas.comparison import (
@@ -20,8 +22,29 @@ class PromptComparisonService:
     """
     Compare two saved prompts.
 
-    This service simply orchestrates two prompt analyses.
+    This service analyzes both prompts and
+    computes comparison metrics.
     """
+
+    def calculate_similarity(
+        self,
+        left_text: str,
+        right_text: str,
+    ) -> float:
+        """
+        Calculate similarity percentage between
+        two rendered prompts.
+        """
+
+        return round(
+            SequenceMatcher(
+                None,
+                left_text,
+                right_text,
+            ).ratio()
+            * 100,
+            1,
+        )
 
     def compare(
         self,
@@ -39,6 +62,21 @@ class PromptComparisonService:
             db=db,
             prompt_id=request.right_prompt_id,
             variables=request.right_variables,
+        )
+
+        left_text = "\n".join(
+            message.content
+            for message in left.rendered_document.messages
+        )
+
+        right_text = "\n".join(
+            message.content
+            for message in right.rendered_document.messages
+        )
+
+        similarity = self.calculate_similarity(
+            left_text,
+            right_text,
         )
 
         summary = PromptComparisonSummary(
@@ -62,6 +100,7 @@ class PromptComparisonService:
                 len(right.variables)
                 - len(left.variables)
             ),
+            similarity=similarity,
         )
 
         return PromptComparisonResponse(

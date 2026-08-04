@@ -7,8 +7,13 @@ class PromptComparisonRequest(BaseModel):
     left_prompt_id: int = Field(gt=0)
     right_prompt_id: int = Field(gt=0)
 
-    left_variables: dict[str, str] = Field(default_factory=dict)
-    right_variables: dict[str, str] = Field(default_factory=dict)
+    left_variables: dict[str, str] = Field(
+        default_factory=dict,
+    )
+
+    right_variables: dict[str, str] = Field(
+        default_factory=dict,
+    )
 
 
 class PromptComparisonSummary(BaseModel):
@@ -17,6 +22,8 @@ class PromptComparisonSummary(BaseModel):
     line_difference: int
     token_difference: int
     variable_difference: int
+
+    similarity: float
 
 
 class PromptComparisonResponse(BaseModel):
