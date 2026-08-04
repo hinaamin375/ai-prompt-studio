@@ -16,6 +16,8 @@ class PromptBase(BaseModel):
         min_length=1,
     )
 
+    favorite: bool = False
+
 
 class PromptCreate(PromptBase):
     pass
@@ -30,14 +32,19 @@ class PromptUpdate(BaseModel):
 
     description: str | None = None
     system_prompt: str | None = None
+
     user_prompt: str | None = Field(
         default=None,
         min_length=1,
     )
 
+    favorite: bool | None = None
+
 
 class PromptResponse(PromptBase):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
     id: int
     created_at: datetime

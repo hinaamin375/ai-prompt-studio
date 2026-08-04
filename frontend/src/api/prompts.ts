@@ -53,3 +53,14 @@ export async function deletePrompt(
     `/prompts/${promptId}`,
   );
 }
+export async function setPromptFavorite(
+  promptId: number,
+  favorite: boolean,
+): Promise<Prompt> {
+  return updatePrompt(
+    promptId,
+    {
+      favorite,
+    },
+  );
+}

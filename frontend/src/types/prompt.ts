@@ -4,6 +4,7 @@ export interface Prompt {
   description: string | null;
   system_prompt: string | null;
   user_prompt: string;
+  favorite: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -13,6 +14,7 @@ export interface PromptCreate {
   description: string | null;
   system_prompt: string | null;
   user_prompt: string;
+  favorite?: boolean;
 }
 
 export interface PromptUpdate {
@@ -20,4 +22,5 @@ export interface PromptUpdate {
   description?: string | null;
   system_prompt?: string | null;
   user_prompt?: string;
+  favorite?: boolean;
 }

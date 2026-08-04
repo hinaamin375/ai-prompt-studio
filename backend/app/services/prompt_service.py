@@ -54,6 +54,13 @@ class PromptService:
     ) -> Prompt:
         prompt = self.get_prompt(db, prompt_id)
 
+        if prompt is None:
+            raise ApplicationError(
+                "The requested prompt was not found.",
+                code="prompt_not_found",
+                status_code=404,
+            )
+
         update_data = data.model_dump(
             exclude_unset=True,
         )

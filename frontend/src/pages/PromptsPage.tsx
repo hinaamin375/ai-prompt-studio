@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
 import { listPrompts } from "../api/prompts";
-import { PromptList } from "../features/prompts/PromptList";
+import { PromptLibrary } from "../features/prompts/components/PromptLibrary";
 
 export function PromptsPage() {
   const promptsQuery = useQuery({
@@ -11,18 +11,58 @@ export function PromptsPage() {
   });
 
   if (promptsQuery.isPending) {
-    return <p>Loading prompts...</p>;
+    return (
+      <section>
+        <header className="page-header">
+          <p className="eyebrow">
+            Prompt Management
+          </p>
+
+          <h2>Prompt Library</h2>
+
+          <p>Loading your saved prompts...</p>
+        </header>
+
+        <div className="card">
+          Loading prompts...
+        </div>
+      </section>
+    );
   }
 
-  if (promptsQuery.isError) {
+  if (
+    promptsQuery.isError ||
+    !promptsQuery.data
+  ) {
     return (
-      <div role="alert" className="card">
-        <h2>Unable to load prompts</h2>
-        <p>
-          Confirm that the backend is running and try
-          again.
-        </p>
-      </div>
+      <section>
+        <header className="page-header">
+          <p className="eyebrow">
+            Prompt Management
+          </p>
+
+          <h2>Prompt Library</h2>
+        </header>
+
+        <div className="card">
+          <h3>Unable to load prompts</h3>
+
+          <p>
+            Confirm the backend is running and
+            try again.
+          </p>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() =>
+              promptsQuery.refetch()
+            }
+          >
+            Try again
+          </button>
+        </div>
+      </section>
     );
   }
 
@@ -30,11 +70,15 @@ export function PromptsPage() {
     <section>
       <header className="page-header page-header-row">
         <div>
-          <p className="eyebrow">Prompt management</p>
+          <p className="eyebrow">
+            Prompt Management
+          </p>
+
           <h2>Prompt Library</h2>
+
           <p>
-            Create and manage reusable AI prompt
-            templates.
+            Search, organize, and manage your
+            saved prompts.
           </p>
         </div>
 
@@ -42,27 +86,28 @@ export function PromptsPage() {
           to="/prompts/new"
           className="primary-button"
         >
-          New prompt
+          New Prompt
         </Link>
       </header>
 
       {promptsQuery.data.length === 0 ? (
         <div className="card empty-state">
           <h3>No prompts yet</h3>
+
           <p>
-            Create your first prompt to begin building
-            your library.
+            Create your first prompt to begin
+            analyzing and comparing it.
           </p>
 
           <Link
             to="/prompts/new"
             className="primary-button"
           >
-            Create prompt
+            Create Prompt
           </Link>
         </div>
       ) : (
-        <PromptList
+        <PromptLibrary
           prompts={promptsQuery.data}
         />
       )}
