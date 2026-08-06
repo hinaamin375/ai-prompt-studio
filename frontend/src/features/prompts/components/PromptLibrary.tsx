@@ -18,6 +18,7 @@ import type {
 
 import { BulkActionsBar } from "./BulkActionsBar";
 import { PromptCard } from "./PromptCard";
+import { PromptToolbar } from "./PromptToolbar";
 
 type PromptSortOption =
   | "updated-desc"
@@ -332,83 +333,18 @@ async function deleteSelected(): Promise<void> {
 }
   return (
     <section className="prompt-library">
-      <div className="prompt-library-toolbar">
-        <div className="prompt-search-field">
-          <label htmlFor="prompt-search">
-            Search prompts
-          </label>
-
-          <input
-            id="prompt-search"
-            type="search"
-            value={searchTerm}
-            placeholder="Search by title, description, or prompt text..."
-            onChange={(event) =>
-              setSearchTerm(event.target.value)
-            }
-          />
-        </div>
-
-        <div className="prompt-sort-field">
-          <label htmlFor="prompt-sort">
-            Sort by
-          </label>
-
-          <select
-            id="prompt-sort"
-            value={sortOption}
-            onChange={(event) =>
-              setSortOption(
-                event.target.value as PromptSortOption,
-              )
-            }
-          >
-            <option value="updated-desc">
-              Recently updated
-            </option>
-
-            <option value="created-desc">
-              Newest first
-            </option>
-
-            <option value="created-asc">
-              Oldest first
-            </option>
-
-            <option value="title-asc">
-              Title A–Z
-            </option>
-
-            <option value="title-desc">
-              Title Z–A
-            </option>
-          </select>
-        </div>
-
-        <label className="favorites-filter">
-            <input
-                type="checkbox"
-                checked={favoritesOnly}
-                onChange={(event) =>
-                setFavoritesOnly(
-                    event.target.checked,
-                )
-                }
-            />
-
-            <span>Favorites only</span>
-            </label>
-
-        {hasActiveFilters && (
-          <button
-            type="button"
-            className="secondary-button prompt-clear-button"
-            onClick={clearFilters}
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
+        <PromptToolbar
+  searchTerm={searchTerm}
+  sortOption={sortOption}
+  favoritesOnly={favoritesOnly}
+  hasActiveFilters={hasActiveFilters}
+  onSearchChange={setSearchTerm}
+  onSortChange={(value) =>
+    setSortOption(value as PromptSortOption)
+  }
+  onFavoritesOnlyChange={setFavoritesOnly}
+  onClearFilters={clearFilters}
+/>
       {selectedPromptIds.length > 0 && (
  <BulkActionsBar
   selected={selectedPromptIds.length}
