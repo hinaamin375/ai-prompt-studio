@@ -19,6 +19,7 @@ import type {
 import { BulkActionsBar } from "./BulkActionsBar";
 import { PromptCard } from "./PromptCard";
 import { PromptToolbar } from "./PromptToolbar";
+import { usePromptSelection } from "../hooks/usePromptSelection";
 
 type PromptSortOption =
   | "updated-desc"
@@ -106,9 +107,6 @@ export function PromptLibrary({
   const [sortOption, setSortOption] =
     useState<PromptSortOption>("updated-desc");
 
-const [selectedPromptIds, setSelectedPromptIds] =
-  useState<number[]>([]);
-
   const [favoritesOnly, setFavoritesOnly] =
   useState(false);
   
@@ -139,12 +137,24 @@ const [bulkLoading, setBulkLoading] =
       filteredPrompts,
       sortOption,
     );
-  }, [
+  },[
     prompts,
     searchTerm,
     sortOption,
     favoritesOnly,
   ]);
+
+const {
+  selectedPromptIds,
+  setSelectedPromptIds,
+  togglePromptSelection,
+  selectAll,
+  clearSelection,
+} = usePromptSelection({
+  visiblePromptIds: visiblePrompts.map(
+    (prompt) => prompt.id,
+  ),
+});
 
   const hasActiveFilters =
     searchTerm.trim().length > 0 ||
@@ -156,37 +166,7 @@ const [bulkLoading, setBulkLoading] =
     setSortOption("updated-desc");
     setFavoritesOnly(false);
   }
-  function togglePromptSelection(
-  promptId: number,
-): void {
-  setSelectedPromptIds((current) =>
-    current.includes(promptId)
-      ? current.filter(
-          (id) => id !== promptId,
-        )
-      : [...current, promptId],
-  );
-}
-
-function selectAll(): void {
-  if (
-    selectedPromptIds.length ===
-    visiblePrompts.length
-  ) {
-    setSelectedPromptIds([]);
-    return;
-  }
-
-  setSelectedPromptIds(
-    visiblePrompts.map(
-      (prompt) => prompt.id,
-    ),
-  );
-}
-
-function clearSelection(): void {
-  setSelectedPromptIds([]);
-}
+  
 async function refreshPrompts(): Promise<void> {
   await queryClient.invalidateQueries({
     queryKey: ["prompts"],
