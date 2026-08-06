@@ -9,6 +9,7 @@ import {
 } from "./FavoriteButton";
 
 import type { Prompt } from "../../../types/prompt";
+import { BulkActionsBar } from "./BulkActionsBar";
 
 type PromptSortOption =
   | "updated-desc"
@@ -100,6 +101,9 @@ export function PromptLibrary({
   const [sortOption, setSortOption] =
     useState<PromptSortOption>("updated-desc");
 
+const [selectedPromptIds, setSelectedPromptIds] =
+  useState<number[]>([]);
+
   const [favoritesOnly, setFavoritesOnly] =
   useState(false);
 
@@ -143,6 +147,37 @@ export function PromptLibrary({
     setSortOption("updated-desc");
     setFavoritesOnly(false);
   }
+  function togglePromptSelection(
+  promptId: number,
+): void {
+  setSelectedPromptIds((current) =>
+    current.includes(promptId)
+      ? current.filter(
+          (id) => id !== promptId,
+        )
+      : [...current, promptId],
+  );
+}
+
+function selectAll(): void {
+  if (
+    selectedPromptIds.length ===
+    visiblePrompts.length
+  ) {
+    setSelectedPromptIds([]);
+    return;
+  }
+
+  setSelectedPromptIds(
+    visiblePrompts.map(
+      (prompt) => prompt.id,
+    ),
+  );
+}
+
+function clearSelection(): void {
+  setSelectedPromptIds([]);
+}
 
   return (
     <section className="prompt-library">
@@ -223,6 +258,17 @@ export function PromptLibrary({
           </button>
         )}
       </div>
+      {selectedPromptIds.length > 0 && (
+  <BulkActionsBar
+    selected={selectedPromptIds.length}
+    allSelected={
+      selectedPromptIds.length ===
+      visiblePrompts.length
+    }
+    onSelectAll={selectAll}
+    onClearSelection={clearSelection}
+  />
+)}
 
       <div className="prompt-library-summary">
         <p>
@@ -257,10 +303,25 @@ export function PromptLibrary({
         <div className="prompt-grid">
           {visiblePrompts.map((prompt) => (
             <article
-              key={prompt.id}
-              className="prompt-card"
-            >
+  key={prompt.id}
+  className={
+    selectedPromptIds.includes(prompt.id)
+      ? "prompt-card selected"
+      : "prompt-card"
+  }
+>
               <div>
+                <div className="prompt-selection">
+  <input
+    type="checkbox"
+    checked={selectedPromptIds.includes(
+      prompt.id,
+    )}
+    onChange={() =>
+      togglePromptSelection(prompt.id)
+    }
+  />
+</div>
                 <div className="prompt-card-heading">
                     <h3>{prompt.title}</h3>
 
