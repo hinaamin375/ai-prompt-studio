@@ -3,13 +3,21 @@ import {
   useState,
 } from "react";
 
-import { Link } from "react-router-dom";
 import {
-  FavoriteButton,
-} from "./FavoriteButton";
+  useQueryClient,
+} from "@tanstack/react-query";
+import { toast } from "sonner";
 
-import type { Prompt } from "../../../types/prompt";
+import {
+  deletePrompt,
+  setPromptFavorite,
+} from "../../../api/prompts";
+import type {
+  Prompt,
+} from "../../../types/prompt";
+
 import { BulkActionsBar } from "./BulkActionsBar";
+import { PromptCard } from "./PromptCard";
 
 type PromptSortOption =
   | "updated-desc"
@@ -86,15 +94,11 @@ function sortPrompts(
   return sortedPrompts;
 }
 
-function formatDate(dateValue: string): string {
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-  }).format(new Date(dateValue));
-}
-
 export function PromptLibrary({
   prompts,
 }: PromptLibraryProps) {
+    const queryClient = useQueryClient();
+
   const [searchTerm, setSearchTerm] =
     useState("");
 
@@ -105,6 +109,10 @@ const [selectedPromptIds, setSelectedPromptIds] =
   useState<number[]>([]);
 
   const [favoritesOnly, setFavoritesOnly] =
+  useState(false);
+  
+
+const [bulkLoading, setBulkLoading] =
   useState(false);
 
   const visiblePrompts = useMemo(() => {
@@ -178,7 +186,150 @@ function selectAll(): void {
 function clearSelection(): void {
   setSelectedPromptIds([]);
 }
+async function refreshPrompts(): Promise<void> {
+  await queryClient.invalidateQueries({
+    queryKey: ["prompts"],
+  });
+}
 
+async function favoriteSelected(): Promise<void> {
+  if (selectedPromptIds.length === 0) {
+    return;
+  }
+
+  setBulkLoading(true);
+
+  try {
+    const promptsToUpdate = prompts.filter(
+      (prompt) =>
+        selectedPromptIds.includes(prompt.id) &&
+        !prompt.favorite,
+    );
+
+    await Promise.all(
+      promptsToUpdate.map((prompt) =>
+        setPromptFavorite(
+          prompt.id,
+          true,
+        ),
+      ),
+    );
+
+    await refreshPrompts();
+
+    setSelectedPromptIds([]);
+
+    toast.success(
+      promptsToUpdate.length === 0
+        ? "Selected prompts are already favorites"
+        : "Selected prompts added to favorites",
+    );
+  } catch {
+    toast.error(
+      "Could not favorite selected prompts",
+      {
+        description:
+          "Please try again.",
+      },
+    );
+  } finally {
+    setBulkLoading(false);
+  }
+}
+
+async function unfavoriteSelected(): Promise<void> {
+  if (selectedPromptIds.length === 0) {
+    return;
+  }
+
+  setBulkLoading(true);
+
+  try {
+    const promptsToUpdate = prompts.filter(
+      (prompt) =>
+        selectedPromptIds.includes(prompt.id) &&
+        prompt.favorite,
+    );
+
+    await Promise.all(
+      promptsToUpdate.map((prompt) =>
+        setPromptFavorite(
+          prompt.id,
+          false,
+        ),
+      ),
+    );
+
+    await refreshPrompts();
+
+    setSelectedPromptIds([]);
+
+    toast.success(
+      promptsToUpdate.length === 0
+        ? "Selected prompts are not favorites"
+        : "Selected prompts removed from favorites",
+    );
+  } catch {
+    toast.error(
+      "Could not unfavorite selected prompts",
+      {
+        description:
+          "Please try again.",
+      },
+    );
+  } finally {
+    setBulkLoading(false);
+  }
+}
+
+async function deleteSelected(): Promise<void> {
+  if (selectedPromptIds.length === 0) {
+    return;
+  }
+
+  const promptLabel =
+    selectedPromptIds.length === 1
+      ? "prompt"
+      : "prompts";
+
+  const confirmed = window.confirm(
+    `Delete ${selectedPromptIds.length} ${promptLabel} permanently?`,
+  );
+
+  if (!confirmed) {
+    toast.info("Bulk deletion cancelled");
+    return;
+  }
+
+  setBulkLoading(true);
+
+  try {
+    await Promise.all(
+      selectedPromptIds.map(
+        (promptId) =>
+          deletePrompt(promptId),
+      ),
+    );
+
+    await refreshPrompts();
+
+    setSelectedPromptIds([]);
+
+    toast.success(
+      `${selectedPromptIds.length} ${promptLabel} deleted`,
+    );
+  } catch {
+    toast.error(
+      "Could not delete selected prompts",
+      {
+        description:
+          "Some prompts may not have been deleted. Refresh and try again.",
+      },
+    );
+  } finally {
+    setBulkLoading(false);
+  }
+}
   return (
     <section className="prompt-library">
       <div className="prompt-library-toolbar">
@@ -259,15 +410,19 @@ function clearSelection(): void {
         )}
       </div>
       {selectedPromptIds.length > 0 && (
-  <BulkActionsBar
-    selected={selectedPromptIds.length}
-    allSelected={
-      selectedPromptIds.length ===
-      visiblePrompts.length
-    }
-    onSelectAll={selectAll}
-    onClearSelection={clearSelection}
-  />
+ <BulkActionsBar
+  selected={selectedPromptIds.length}
+  allSelected={
+    selectedPromptIds.length ===
+    visiblePrompts.length
+  }
+  isLoading={bulkLoading}
+  onFavoriteSelected={favoriteSelected}
+  onUnfavoriteSelected={unfavoriteSelected}
+  onDeleteSelected={deleteSelected}
+  onSelectAll={selectAll}
+  onClearSelection={clearSelection}
+/>
 )}
 
       <div className="prompt-library-summary">
@@ -302,65 +457,17 @@ function clearSelection(): void {
       ) : (
         <div className="prompt-grid">
           {visiblePrompts.map((prompt) => (
-            <article
-  key={prompt.id}
-  className={
-    selectedPromptIds.includes(prompt.id)
-      ? "prompt-card selected"
-      : "prompt-card"
-  }
->
-              <div>
-                <div className="prompt-selection">
-  <input
-    type="checkbox"
-    checked={selectedPromptIds.includes(
+  <PromptCard
+    key={prompt.id}
+    prompt={prompt}
+    selected={selectedPromptIds.includes(
       prompt.id,
     )}
-    onChange={() =>
-      togglePromptSelection(prompt.id)
+    onToggleSelection={
+      togglePromptSelection
     }
   />
-</div>
-                <div className="prompt-card-heading">
-                    <h3>{prompt.title}</h3>
-
-                    <div className="prompt-card-actions">
-                        <FavoriteButton
-                        promptId={prompt.id}
-                        favorite={prompt.favorite}
-                        />
-
-                        <span className="prompt-id-badge">
-                        #{prompt.id}
-                        </span>
-                    </div>
-                    </div>
-
-                <p>
-                  {prompt.description?.trim() ||
-                    "No description provided."}
-                </p>
-
-                <div className="prompt-card-preview">
-                  {prompt.user_prompt}
-                </div>
-              </div>
-
-              <footer className="prompt-card-footer">
-                <span>
-                  Updated{" "}
-                  {formatDate(prompt.updated_at)}
-                </span>
-
-                <Link
-                  to={`/prompts/${prompt.id}/edit`}
-                >
-                  Open prompt
-                </Link>
-              </footer>
-            </article>
-          ))}
+))}
         </div>
       )}
     </section>

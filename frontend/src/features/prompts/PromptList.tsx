@@ -1,5 +1,5 @@
 import type { Prompt } from "../../types/prompt";
-import { PromptCard } from "./PromptCard";
+import { PromptCard } from "./components/PromptCard";
 
 interface PromptListProps {
   prompts: Prompt[];

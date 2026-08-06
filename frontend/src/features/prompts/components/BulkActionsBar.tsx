@@ -1,6 +1,11 @@
 interface BulkActionsBarProps {
   selected: number;
   allSelected: boolean;
+  isLoading: boolean;
+
+  onFavoriteSelected(): void;
+  onUnfavoriteSelected(): void;
+  onDeleteSelected(): void;
 
   onSelectAll(): void;
   onClearSelection(): void;
@@ -9,6 +14,10 @@ interface BulkActionsBarProps {
 export function BulkActionsBar({
   selected,
   allSelected,
+  isLoading,
+  onFavoriteSelected,
+  onUnfavoriteSelected,
+  onDeleteSelected,
   onSelectAll,
   onClearSelection,
 }: BulkActionsBarProps) {
@@ -23,16 +32,43 @@ export function BulkActionsBar({
         <button
           type="button"
           className="secondary-button"
-          onClick={onSelectAll}
+          disabled={isLoading}
+          onClick={onFavoriteSelected}
         >
-          {allSelected
-            ? "Deselect All"
-            : "Select All"}
+          ⭐ Favorite
         </button>
 
         <button
           type="button"
           className="secondary-button"
+          disabled={isLoading}
+          onClick={onUnfavoriteSelected}
+        >
+          ☆ Unfavorite
+        </button>
+
+        <button
+          type="button"
+          className="danger-button"
+          disabled={isLoading}
+          onClick={onDeleteSelected}
+        >
+          🗑 Delete
+        </button>
+
+        <button
+          type="button"
+          className="secondary-button"
+          disabled={isLoading}
+          onClick={onSelectAll}
+        >
+          {allSelected ? "Deselect All" : "Select All"}
+        </button>
+
+        <button
+          type="button"
+          className="secondary-button"
+          disabled={isLoading}
           onClick={onClearSelection}
         >
           Clear
