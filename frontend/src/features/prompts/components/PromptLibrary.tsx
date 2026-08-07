@@ -3,19 +3,11 @@ import {
   useState,
 } from "react";
 
-import {
-  useQueryClient,
-} from "@tanstack/react-query";
-import { toast } from "sonner";
 
-import {
-  deletePrompt,
-  setPromptFavorite,
-} from "../../../api/prompts";
 import type {
   Prompt,
 } from "../../../types/prompt";
-
+import { useBulkPromptActions } from "../hooks/useBulkPromptActions";
 import { BulkActionsBar } from "./BulkActionsBar";
 import { PromptCard } from "./PromptCard";
 import { PromptToolbar } from "./PromptToolbar";
@@ -99,7 +91,7 @@ function sortPrompts(
 export function PromptLibrary({
   prompts,
 }: PromptLibraryProps) {
-    const queryClient = useQueryClient();
+    
 
   const [searchTerm, setSearchTerm] =
     useState("");
@@ -110,9 +102,6 @@ export function PromptLibrary({
   const [favoritesOnly, setFavoritesOnly] =
   useState(false);
   
-
-const [bulkLoading, setBulkLoading] =
-  useState(false);
 
   const visiblePrompts = useMemo(() => {
     const filteredPrompts = prompts.filter(
@@ -146,7 +135,6 @@ const [bulkLoading, setBulkLoading] =
 
 const {
   selectedPromptIds,
-  setSelectedPromptIds,
   togglePromptSelection,
   selectAll,
   clearSelection,
@@ -155,7 +143,16 @@ const {
     (prompt) => prompt.id,
   ),
 });
-
+const {
+  favoriteSelected,
+  unfavoriteSelected,
+  deleteSelected,
+  isLoading,
+} = useBulkPromptActions({
+  prompts,
+  selectedPromptIds,
+  clearSelection,
+});
   const hasActiveFilters =
     searchTerm.trim().length > 0 ||
     sortOption !== "updated-desc" ||
@@ -167,150 +164,6 @@ const {
     setFavoritesOnly(false);
   }
   
-async function refreshPrompts(): Promise<void> {
-  await queryClient.invalidateQueries({
-    queryKey: ["prompts"],
-  });
-}
-
-async function favoriteSelected(): Promise<void> {
-  if (selectedPromptIds.length === 0) {
-    return;
-  }
-
-  setBulkLoading(true);
-
-  try {
-    const promptsToUpdate = prompts.filter(
-      (prompt) =>
-        selectedPromptIds.includes(prompt.id) &&
-        !prompt.favorite,
-    );
-
-    await Promise.all(
-      promptsToUpdate.map((prompt) =>
-        setPromptFavorite(
-          prompt.id,
-          true,
-        ),
-      ),
-    );
-
-    await refreshPrompts();
-
-    setSelectedPromptIds([]);
-
-    toast.success(
-      promptsToUpdate.length === 0
-        ? "Selected prompts are already favorites"
-        : "Selected prompts added to favorites",
-    );
-  } catch {
-    toast.error(
-      "Could not favorite selected prompts",
-      {
-        description:
-          "Please try again.",
-      },
-    );
-  } finally {
-    setBulkLoading(false);
-  }
-}
-
-async function unfavoriteSelected(): Promise<void> {
-  if (selectedPromptIds.length === 0) {
-    return;
-  }
-
-  setBulkLoading(true);
-
-  try {
-    const promptsToUpdate = prompts.filter(
-      (prompt) =>
-        selectedPromptIds.includes(prompt.id) &&
-        prompt.favorite,
-    );
-
-    await Promise.all(
-      promptsToUpdate.map((prompt) =>
-        setPromptFavorite(
-          prompt.id,
-          false,
-        ),
-      ),
-    );
-
-    await refreshPrompts();
-
-    setSelectedPromptIds([]);
-
-    toast.success(
-      promptsToUpdate.length === 0
-        ? "Selected prompts are not favorites"
-        : "Selected prompts removed from favorites",
-    );
-  } catch {
-    toast.error(
-      "Could not unfavorite selected prompts",
-      {
-        description:
-          "Please try again.",
-      },
-    );
-  } finally {
-    setBulkLoading(false);
-  }
-}
-
-async function deleteSelected(): Promise<void> {
-  if (selectedPromptIds.length === 0) {
-    return;
-  }
-
-  const promptLabel =
-    selectedPromptIds.length === 1
-      ? "prompt"
-      : "prompts";
-
-  const confirmed = window.confirm(
-    `Delete ${selectedPromptIds.length} ${promptLabel} permanently?`,
-  );
-
-  if (!confirmed) {
-    toast.info("Bulk deletion cancelled");
-    return;
-  }
-
-  setBulkLoading(true);
-
-  try {
-    await Promise.all(
-      selectedPromptIds.map(
-        (promptId) =>
-          deletePrompt(promptId),
-      ),
-    );
-
-    await refreshPrompts();
-
-    setSelectedPromptIds([]);
-
-    toast.success(
-      `${selectedPromptIds.length} ${promptLabel} deleted`,
-    );
-  } catch {
-    toast.error(
-      "Could not delete selected prompts",
-      {
-        description:
-          "Some prompts may not have been deleted. Refresh and try again.",
-      },
-    );
-  } finally {
-    setBulkLoading(false);
-  }
-}
   return (
     <section className="prompt-library">
         <PromptToolbar
@@ -332,7 +185,7 @@ async function deleteSelected(): Promise<void> {
     selectedPromptIds.length ===
     visiblePrompts.length
   }
-  isLoading={bulkLoading}
+  isLoading={isLoading}
   onFavoriteSelected={favoriteSelected}
   onUnfavoriteSelected={unfavoriteSelected}
   onDeleteSelected={deleteSelected}
