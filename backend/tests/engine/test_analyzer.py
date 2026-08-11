@@ -2,6 +2,8 @@
 Unit tests for the Prompt Analyzer.
 """
 
+from unittest import result
+
 from app.domain import PromptDocument, PromptMessage, PromptRole
 from app.engine.analyzer import PromptAnalyzer
 from app.engine.parser import PromptParser
@@ -39,7 +41,17 @@ def test_analyzer_renders_prompt_and_collects_missing_variables() -> None:
         variables={"name": "Hina"},
     )
 
-    assert result.rendered_document == "Hello Hina\n\nReview {{company}}."
+    assert len(result.rendered_document.messages) == 2 
+    assert (
+        result.rendered_document.messages[0].content
+        == "Hello Hina"
+    )
+
+    assert (
+        result.rendered_document.messages[1].content
+        == "Review {{company}}."
+    )
+
     assert [item.name for item in result.variables] == ["name", "company"]
     assert result.missing_variables == ["company"]
     assert result.warnings == []
@@ -69,6 +81,11 @@ def test_analyzer_adds_warning_for_large_prompts() -> None:
 
     result = analyzer.analyze(document=document)
 
-    assert result.rendered_document == "A" * 32001
+    assert len(result.rendered_document.messages) == 1
+
+    assert (
+    result.rendered_document.messages[0].content
+    == "A" * 32001
+    )
     assert result.missing_variables == []
     assert result.warnings == ["Prompt exceeds approximately 8000 tokens."]

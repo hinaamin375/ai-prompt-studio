@@ -1,9 +1,26 @@
-from datetime import datetime
+from __future__ import annotations
 
-from sqlalchemy import Boolean, DateTime, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    String,
+    Text,
+    func,
+)
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.collection import Collection
 
 
 class Prompt(Base):
@@ -49,8 +66,21 @@ class Prompt(Base):
     )
 
     favorite: Mapped[bool] = mapped_column(
-    Boolean,
-    nullable=False,
-    default=False,
-    server_default="0",
-)
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
+    )
+
+    collection_id: Mapped[int | None] = mapped_column(
+        ForeignKey(
+            "collections.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
+    collection: Mapped["Collection | None"] = relationship(
+        back_populates="prompts",
+    )

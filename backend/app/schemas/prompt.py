@@ -1,6 +1,10 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+)
 
 
 class PromptBase(BaseModel):
@@ -17,6 +21,11 @@ class PromptBase(BaseModel):
     )
 
     favorite: bool = False
+
+    collection_id: int | None = Field(
+        default=None,
+        gt=0,
+    )
 
 
 class PromptCreate(PromptBase):
@@ -39,6 +48,11 @@ class PromptUpdate(BaseModel):
     )
 
     favorite: bool | None = None
+
+    collection_id: int | None = Field(
+        default=None,
+        gt=0,
+    )
 
 
 class PromptResponse(PromptBase):
