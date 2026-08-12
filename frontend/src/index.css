@@ -1363,3 +1363,130 @@ box-shadow:
   opacity: .5;
   cursor: not-allowed;
 }
+/* =========================================================
+   Prompt Library - Collection filtering
+   ========================================================= */
+
+.prompt-library-toolbar {
+  display: grid;
+  grid-template-columns:
+    minmax(320px, 1fr)
+    minmax(180px, 210px)
+    minmax(180px, 210px)
+    auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.prompt-search-field,
+.prompt-sort-field,
+.prompt-collection-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.prompt-search-field label,
+.prompt-sort-field label,
+.prompt-collection-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.prompt-search-field input,
+.prompt-sort-field select,
+.prompt-collection-field select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+}
+
+.prompt-collection-field select {
+  cursor: pointer;
+}
+
+.prompt-collection-field select:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+
+/* Favorites control */
+
+.favorites-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 42px;
+  padding: 0 14px;
+
+  white-space: nowrap;
+}
+
+.favorites-filter input {
+  margin: 0;
+}
+
+
+/* Clear filters should sit cleanly below the controls */
+
+.prompt-clear-button {
+  justify-self: start;
+}
+
+
+/* =========================================================
+   Collection badge on prompt cards
+   ========================================================= */
+
+.prompt-card-collection {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-top: 6px;
+  margin-bottom: 10px;
+
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   Responsive toolbar
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .prompt-library-toolbar {
+    grid-template-columns:
+      minmax(260px, 1fr)
+      minmax(170px, 1fr)
+      minmax(170px, 1fr);
+  }
+
+  .favorites-filter {
+    justify-self: start;
+  }
+}
+
+
+@media (max-width: 800px) {
+  .prompt-library-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .prompt-search-field,
+  .prompt-sort-field,
+  .prompt-collection-field {
+    width: 100%;
+  }
+
+  .favorites-filter {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}

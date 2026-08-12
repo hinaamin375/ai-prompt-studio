@@ -1,25 +1,42 @@
 import { Link } from "react-router-dom";
 
-import type { Prompt } from "../../../types/prompt";
+import type {
+  Prompt,
+} from "../../../types/prompt";
 
 import { FavoriteButton } from "./FavoriteButton";
 
+
 interface PromptCardProps {
   prompt: Prompt;
+
+  collectionName?: string | null;
+
   selected?: boolean;
+
   onToggleSelection?: (
     promptId: number,
   ) => void;
 }
 
-function formatDate(dateValue: string): string {
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-  }).format(new Date(dateValue));
+
+function formatDate(
+  dateValue: string,
+): string {
+  return new Intl.DateTimeFormat(
+    "en",
+    {
+      dateStyle: "medium",
+    },
+  ).format(
+    new Date(dateValue),
+  );
 }
+
 
 export function PromptCard({
   prompt,
+  collectionName = null,
   selected = false,
   onToggleSelection,
 }: PromptCardProps) {
@@ -39,19 +56,26 @@ export function PromptCard({
               aria-label={`Select ${prompt.title}`}
               checked={selected}
               onChange={() =>
-                onToggleSelection(prompt.id)
+                onToggleSelection(
+                  prompt.id,
+                )
               }
             />
           </div>
         )}
 
+
         <div className="prompt-card-heading">
-          <h3>{prompt.title}</h3>
+          <h3>
+            {prompt.title}
+          </h3>
 
           <div className="prompt-card-actions">
             <FavoriteButton
               promptId={prompt.id}
-              favorite={prompt.favorite}
+              favorite={
+                prompt.favorite
+              }
             />
 
             <span className="prompt-id-badge">
@@ -60,19 +84,36 @@ export function PromptCard({
           </div>
         </div>
 
+
+       {collectionName && (
+  <div className="prompt-card-collection">
+    <span aria-hidden="true">
+      📁
+    </span>
+
+    <span>{collectionName}</span>
+  </div>
+)}
+
+
         <p>
           {prompt.description?.trim() ||
             "No description provided."}
         </p>
+
 
         <div className="prompt-card-preview">
           {prompt.user_prompt}
         </div>
       </div>
 
+
       <footer className="prompt-card-footer">
         <span>
-          Updated {formatDate(prompt.updated_at)}
+          Updated{" "}
+          {formatDate(
+            prompt.updated_at,
+          )}
         </span>
 
         <Link
