@@ -5,9 +5,11 @@ export interface Prompt {
   system_prompt: string | null;
   user_prompt: string;
   favorite: boolean;
+  collection_id: number | null;
   created_at: string;
   updated_at: string;
 }
+
 
 export interface PromptCreate {
   title: string;
@@ -15,7 +17,9 @@ export interface PromptCreate {
   system_prompt: string | null;
   user_prompt: string;
   favorite?: boolean;
+  collection_id?: number | null;
 }
+
 
 export interface PromptUpdate {
   title?: string;
@@ -23,4 +27,5 @@ export interface PromptUpdate {
   system_prompt?: string | null;
   user_prompt?: string;
   favorite?: boolean;
+  collection_id?: number | null;
 }

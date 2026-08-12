@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import type {
   PromptCreate,
 } from "../../types/prompt";
+import { useCollections } from "./hooks/useCollections";
+
 
 interface PromptFormProps {
   initialValues?: PromptCreate;
@@ -13,12 +15,15 @@ interface PromptFormProps {
   ) => Promise<void>;
 }
 
+
 const defaultValues: PromptCreate = {
   title: "",
   description: "",
   system_prompt: "",
   user_prompt: "",
+  collection_id: null,
 };
+
 
 export function PromptForm({
   initialValues = defaultValues,
@@ -27,6 +32,12 @@ export function PromptForm({
   onSubmit,
 }: PromptFormProps) {
   const {
+    data: collections = [],
+    isLoading: collectionsLoading,
+    isError: collectionsError,
+  } = useCollections();
+
+  const {
     register,
     handleSubmit,
     formState: { errors },
@@ -34,10 +45,22 @@ export function PromptForm({
     defaultValues: initialValues,
   });
 
+
+  async function handleFormSubmit(
+    values: PromptCreate,
+  ): Promise<void> {
+    await onSubmit({
+      ...values,
+      collection_id:
+        values.collection_id ?? null,
+    });
+  }
+
+
   return (
     <form
       className="prompt-form"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(handleFormSubmit)}
     >
       <div className="form-field">
         <label htmlFor="title">
@@ -64,6 +87,7 @@ export function PromptForm({
         )}
       </div>
 
+
       <div className="form-field">
         <label htmlFor="description">
           Description
@@ -75,6 +99,60 @@ export function PromptForm({
           {...register("description")}
         />
       </div>
+
+
+      <div className="form-field">
+        <label htmlFor="collection">
+          Collection
+        </label>
+
+        <select
+          id="collection"
+          disabled={
+            collectionsLoading ||
+            collectionsError
+          }
+          {...register("collection_id", {
+            setValueAs: (value) => {
+              if (
+                value === "" ||
+                value === null ||
+                value === undefined
+              ) {
+                return null;
+              }
+
+              return Number(value);
+            },
+          })}
+        >
+          <option value="">
+            No collection
+          </option>
+
+          {collections.map((collection) => (
+            <option
+              key={collection.id}
+              value={collection.id}
+            >
+              {collection.name}
+            </option>
+          ))}
+        </select>
+
+        {collectionsLoading && (
+          <p className="field-help">
+            Loading collections...
+          </p>
+        )}
+
+        {collectionsError && (
+          <p className="field-error">
+            Collections could not be loaded.
+          </p>
+        )}
+      </div>
+
 
       <div className="form-field">
         <label htmlFor="system-prompt">
@@ -93,6 +171,7 @@ export function PromptForm({
           constraints.
         </p>
       </div>
+
 
       <div className="form-field">
         <label htmlFor="user-prompt">
@@ -114,6 +193,7 @@ export function PromptForm({
           </p>
         )}
       </div>
+
 
       <div className="form-actions">
         <button
