@@ -8,7 +8,9 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-
+import {
+  PromptVersionHistory,
+} from "../features/promptVersions";
 import {
   deletePrompt,
   getPrompt,
@@ -132,6 +134,8 @@ export function EditPromptPage() {
       promptQuery.data.system_prompt ?? "",
     user_prompt:
       promptQuery.data.user_prompt,
+      collection_id:
+  promptQuery.data.collection_id,
   };
 
   return (
@@ -172,6 +176,9 @@ export function EditPromptPage() {
           onSubmit={handleUpdate}
         />
       </div>
+      <PromptVersionHistory
+  promptId={promptId}
+/>
 
       <div className="card analysis-test-card">
         <h3>Prompt Analysis</h3>

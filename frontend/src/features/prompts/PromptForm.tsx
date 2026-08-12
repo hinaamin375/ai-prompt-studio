@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-
+import { useEffect } from "react";
 import type {
   PromptCreate,
 } from "../../types/prompt";
@@ -40,10 +40,21 @@ export function PromptForm({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<PromptCreate>({
     defaultValues: initialValues,
   });
+  useEffect(() => {
+  reset(initialValues);
+}, [
+  initialValues.title,
+  initialValues.description,
+  initialValues.system_prompt,
+  initialValues.user_prompt,
+  initialValues.collection_id,
+  reset,
+]);
 
 
   async function handleFormSubmit(
