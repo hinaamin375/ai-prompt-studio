@@ -12,6 +12,17 @@ from app.schemas.prompt import (
     PromptCreate,
     PromptUpdate,
 )
+from app.services.prompt_version_service import (
+    prompt_version_service,
+)
+
+
+VERSIONED_FIELDS = {
+    "title",
+    "description",
+    "system_prompt",
+    "user_prompt",
+}
 
 
 class PromptService:
@@ -29,9 +40,11 @@ class PromptService:
         if collection_id is None:
             return
 
-        collection = collection_repository.get_by_id(
-            db,
-            collection_id,
+        collection = (
+            collection_repository.get_by_id(
+                db,
+                collection_id,
+            )
         )
 
         if collection is None:
@@ -40,6 +53,29 @@ class PromptService:
                 code="collection_not_found",
                 status_code=404,
             )
+
+    def _has_versioned_changes(
+        self,
+        prompt: Prompt,
+        update_data: dict[str, object],
+    ) -> bool:
+        """
+        Determine whether this update changes prompt content.
+
+        Favorite and collection-only changes deliberately do not
+        create history entries.
+        """
+        for field in VERSIONED_FIELDS:
+            if field not in update_data:
+                continue
+
+            if (
+                getattr(prompt, field)
+                != update_data[field]
+            ):
+                return True
+
+        return False
 
     def create_prompt(
         self,
@@ -69,16 +105,20 @@ class PromptService:
         self,
         db: Session,
     ) -> list[Prompt]:
-        return prompt_repository.list_all(db)
+        return prompt_repository.list_all(
+            db,
+        )
 
     def get_prompt(
         self,
         db: Session,
         prompt_id: int,
     ) -> Prompt:
-        prompt = prompt_repository.get_by_id(
-            db,
-            prompt_id,
+        prompt = (
+            prompt_repository.get_by_id(
+                db,
+                prompt_id,
+            )
         )
 
         if prompt is None:
@@ -109,12 +149,29 @@ class PromptService:
             title = update_data["title"]
 
             if title is not None:
-                update_data["title"] = title.strip()
+                update_data["title"] = (
+                    title.strip()
+                )
 
         if "collection_id" in update_data:
             self._validate_collection(
                 db,
-                update_data["collection_id"],
+                update_data[
+                    "collection_id"
+                ],
+            )
+
+        has_versioned_changes = (
+            self._has_versioned_changes(
+                prompt,
+                update_data,
+            )
+        )
+
+        if has_versioned_changes:
+            prompt_version_service.create_snapshot(
+                db,
+                prompt,
             )
 
         for field, value in update_data.items():

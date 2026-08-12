@@ -7,8 +7,10 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Integer,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import (
@@ -20,22 +22,42 @@ from sqlalchemy.orm import (
 from app.db.base import Base
 
 if TYPE_CHECKING:
-    from app.models.collection import Collection
-    from app.models.prompt_version import PromptVersion
+    from app.models.prompt import Prompt
 
 
-class Prompt(Base):
-    __tablename__ = "prompts"
+class PromptVersion(Base):
+    __tablename__ = "prompt_versions"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "prompt_id",
+            "version",
+            name="uq_prompt_versions_prompt_id_version",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(
         primary_key=True,
         index=True,
     )
 
+    prompt_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "prompts.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
     title: Mapped[str] = mapped_column(
         String(200),
         nullable=False,
-        index=True,
     )
 
     description: Mapped[str | None] = mapped_column(
@@ -50,19 +72,6 @@ class Prompt(Base):
 
     user_prompt: Mapped[str] = mapped_column(
         Text,
-        nullable=False,
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False,
-    )
-
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now(),
         nullable=False,
     )
 
@@ -82,12 +91,12 @@ class Prompt(Base):
         index=True,
     )
 
-    collection: Mapped["Collection | None"] = relationship(
-        back_populates="prompts",
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
     )
 
-    versions: Mapped[list["PromptVersion"]] = relationship(
-        back_populates="prompt",
-        cascade="all, delete-orphan",
-        passive_deletes=True,
+    prompt: Mapped["Prompt"] = relationship(
+        back_populates="versions",
     )

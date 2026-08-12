@@ -1,6 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Response,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -13,15 +18,25 @@ from app.schemas.prompt import (
     PromptResponse,
     PromptUpdate,
 )
+from app.schemas.prompt_version import (
+    PromptVersionResponse,
+)
 from app.services.prompt_analysis_service import (
     prompt_analysis_service,
 )
-from app.services.prompt_service import prompt_service
+from app.services.prompt_service import (
+    prompt_service,
+)
+from app.services.prompt_version_service import (
+    prompt_version_service,
+)
+
 
 router = APIRouter(
     prefix="/prompts",
     tags=["Prompts"],
 )
+
 
 DatabaseSession = Annotated[
     Session,
@@ -38,7 +53,10 @@ def create_prompt(
     data: PromptCreate,
     db: DatabaseSession,
 ) -> PromptResponse:
-    return prompt_service.create_prompt(db, data)
+    return prompt_service.create_prompt(
+        db,
+        data,
+    )
 
 
 @router.get(
@@ -48,7 +66,63 @@ def create_prompt(
 def list_prompts(
     db: DatabaseSession,
 ) -> list[PromptResponse]:
-    return prompt_service.list_prompts(db)
+    return prompt_service.list_prompts(
+        db,
+    )
+
+
+@router.get(
+    "/{prompt_id}/versions",
+    response_model=list[
+        PromptVersionResponse
+    ],
+)
+def list_prompt_versions(
+    prompt_id: int,
+    db: DatabaseSession,
+) -> list[PromptVersionResponse]:
+    return (
+        prompt_version_service.list_versions(
+            db,
+            prompt_id,
+        )
+    )
+
+
+@router.get(
+    "/{prompt_id}/versions/{version}",
+    response_model=PromptVersionResponse,
+)
+def get_prompt_version(
+    prompt_id: int,
+    version: int,
+    db: DatabaseSession,
+) -> PromptVersionResponse:
+    return (
+        prompt_version_service.get_version(
+            db,
+            prompt_id,
+            version,
+        )
+    )
+
+
+@router.post(
+    "/{prompt_id}/versions/{version}/restore",
+    response_model=PromptResponse,
+)
+def restore_prompt_version(
+    prompt_id: int,
+    version: int,
+    db: DatabaseSession,
+) -> PromptResponse:
+    return (
+        prompt_version_service.restore_version(
+            db,
+            prompt_id,
+            version,
+        )
+    )
 
 
 @router.post(
@@ -63,10 +137,12 @@ def analyze_prompt(
     """
     Analyze a saved prompt using optional variable values.
     """
-    return prompt_analysis_service.analyze_prompt(
-        db=db,
-        prompt_id=prompt_id,
-        variables=data.variables,
+    return (
+        prompt_analysis_service.analyze_prompt(
+            db=db,
+            prompt_id=prompt_id,
+            variables=data.variables,
+        )
     )
 
 
