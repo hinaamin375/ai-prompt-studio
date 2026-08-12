@@ -3,17 +3,37 @@ import {
   useState,
 } from "react";
 
+import {
+  useSearchParams,
+} from "react-router-dom";
+
 import type {
   Prompt,
 } from "../../../types/prompt";
 
-import { useBulkPromptActions } from "../hooks/useBulkPromptActions";
-import { useCollections } from "../hooks/useCollections";
-import { usePromptSelection } from "../hooks/usePromptSelection";
+import {
+  useBulkPromptActions,
+} from "../hooks/useBulkPromptActions";
 
-import { BulkActionsBar } from "./BulkActionsBar";
-import { PromptCard } from "./PromptCard";
-import { PromptToolbar } from "./PromptToolbar";
+import {
+  useCollections,
+} from "../hooks/useCollections";
+
+import {
+  usePromptSelection,
+} from "../hooks/usePromptSelection";
+
+import {
+  BulkActionsBar,
+} from "./BulkActionsBar";
+
+import {
+  PromptCard,
+} from "./PromptCard";
+
+import {
+  PromptToolbar,
+} from "./PromptToolbar";
 
 
 type PromptSortOption =
@@ -124,6 +144,12 @@ function sortPrompts(
 export function PromptLibrary({
   prompts,
 }: PromptLibraryProps) {
+  const [
+    searchParams,
+    setSearchParams,
+  ] = useSearchParams();
+
+
   const [searchTerm, setSearchTerm] =
     useState("");
 
@@ -137,10 +163,10 @@ export function PromptLibrary({
     setFavoritesOnly,
   ] = useState(false);
 
-  const [
-    collectionFilter,
-    setCollectionFilter,
-  ] = useState("all");
+
+  const collectionFilter =
+    searchParams.get("collection") ??
+    "all";
 
 
   const {
@@ -173,9 +199,15 @@ export function PromptLibrary({
         } else if (
           collectionFilter !== "all"
         ) {
-          matchesCollection =
-            prompt.collection_id ===
+          const collectionId =
             Number(collectionFilter);
+
+          matchesCollection =
+            Number.isFinite(
+              collectionId,
+            ) &&
+            prompt.collection_id ===
+              collectionId;
         }
 
 
@@ -185,6 +217,7 @@ export function PromptLibrary({
           matchesCollection
         );
       });
+
 
     return sortPrompts(
       filteredPrompts,
@@ -231,11 +264,58 @@ export function PromptLibrary({
     collectionFilter !== "all";
 
 
+  function handleCollectionFilterChange(
+    value: string,
+  ): void {
+    const nextParams =
+      new URLSearchParams(
+        searchParams,
+      );
+
+    if (value === "all") {
+      nextParams.delete(
+        "collection",
+      );
+    } else {
+      nextParams.set(
+        "collection",
+        value,
+      );
+    }
+
+    setSearchParams(
+      nextParams,
+      {
+        replace: true,
+      },
+    );
+
+    clearSelection();
+  }
+
+
   function clearFilters(): void {
     setSearchTerm("");
     setSortOption("updated-desc");
     setFavoritesOnly(false);
-    setCollectionFilter("all");
+
+    const nextParams =
+      new URLSearchParams(
+        searchParams,
+      );
+
+    nextParams.delete(
+      "collection",
+    );
+
+    setSearchParams(
+      nextParams,
+      {
+        replace: true,
+      },
+    );
+
+    clearSelection();
   }
 
 
@@ -252,7 +332,9 @@ export function PromptLibrary({
           item.id === collectionId,
       );
 
-    return collection?.name ?? null;
+    return (
+      collection?.name ?? null
+    );
   }
 
 
@@ -284,7 +366,7 @@ export function PromptLibrary({
           setFavoritesOnly
         }
         onCollectionFilterChange={
-          setCollectionFilter
+          handleCollectionFilterChange
         }
         onClearFilters={
           clearFilters
@@ -299,7 +381,8 @@ export function PromptLibrary({
             selectedPromptIds.length
           }
           allSelected={
-            visiblePrompts.length > 0 &&
+            visiblePrompts.length >
+              0 &&
             selectedPromptIds.length ===
               visiblePrompts.length
           }
@@ -313,7 +396,9 @@ export function PromptLibrary({
           onDeleteSelected={
             deleteSelected
           }
-          onSelectAll={selectAll}
+          onSelectAll={
+            selectAll
+          }
           onClearSelection={
             clearSelection
           }
@@ -353,7 +438,9 @@ export function PromptLibrary({
           <button
             type="button"
             className="secondary-button"
-            onClick={clearFilters}
+            onClick={
+              clearFilters
+            }
           >
             Clear filters
           </button>
@@ -370,9 +457,11 @@ export function PromptLibrary({
                     prompt.collection_id,
                   )
                 }
-                selected={selectedPromptIds.includes(
-                  prompt.id,
-                )}
+                selected={
+                  selectedPromptIds.includes(
+                    prompt.id,
+                  )
+                }
                 onToggleSelection={
                   togglePromptSelection
                 }

@@ -1490,3 +1490,376 @@ box-shadow:
     width: 100%;
   }
 }
+/* =========================================================
+   Collection Management
+   ========================================================= */
+
+.collection-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+
+/* Create collection */
+
+.collection-create-card {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+
+  padding: 24px;
+
+  background: #ffffff;
+  border: 1px solid #dfe3eb;
+  border-radius: 12px;
+}
+
+.collection-create-card h2,
+.collection-list-heading h2 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.collection-create-card p,
+.collection-list-heading p {
+  margin: 0;
+  color: #64748b;
+}
+
+
+.collection-create-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+
+  min-width: 420px;
+}
+
+
+.collection-name-field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+
+.collection-name-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+
+.collection-name-field input {
+  width: 100%;
+  height: 42px;
+}
+
+
+/* Collection list */
+
+.collection-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+
+.collection-list-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+
+.collection-count {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+
+.collection-list {
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #dfe3eb;
+  border-radius: 12px;
+}
+
+
+.collection-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  min-height: 76px;
+  padding: 16px 20px;
+
+  border-bottom: 1px solid #e8ebf0;
+}
+
+
+.collection-row:last-child {
+  border-bottom: 0;
+}
+
+
+.collection-row-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  flex: 1;
+  min-width: 0;
+}
+
+
+.collection-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  border-radius: 8px;
+  background: #f4f6fa;
+
+  font-size: 1.05rem;
+}
+
+
+.collection-details {
+  min-width: 0;
+}
+
+
+.collection-details h3 {
+  margin: 0 0 4px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 1rem;
+}
+
+
+.collection-details span {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+
+.collection-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+
+.collection-edit-field {
+  flex: 1;
+  max-width: 420px;
+}
+
+
+.collection-edit-field input {
+  width: 100%;
+  height: 40px;
+}
+
+
+/* Empty/loading/error */
+
+.collection-state-card {
+  padding: 32px;
+
+  text-align: center;
+
+  background: #ffffff;
+  border: 1px solid #dfe3eb;
+  border-radius: 12px;
+
+  color: #64748b;
+}
+
+
+.collection-state-card h3 {
+  margin: 0 0 6px;
+  color: #172033;
+}
+
+
+.collection-state-card p {
+  margin: 0;
+}
+
+
+/* Accessibility */
+
+.sr-only {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .collection-create-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .collection-create-form {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+
+@media (max-width: 650px) {
+  .collection-create-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .collection-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .collection-row-actions {
+    width: 100%;
+  }
+
+  .collection-row-actions button {
+    flex: 1;
+  }
+
+  .collection-edit-field {
+    max-width: none;
+  }
+}
+/* =========================================================
+   Collection prompt counts and navigation
+   ========================================================= */
+
+.collection-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+
+.collection-details .collection-meta span {
+  color: inherit;
+  font-size: inherit;
+}
+
+
+.collection-view-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+
+@media (max-width: 650px) {
+  .collection-view-link {
+    flex: 1;
+  }
+}
+/* =========================================================
+   Collection unassigned summary
+   ========================================================= */
+
+.collection-unassigned-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  margin-bottom: 24px;
+  padding: 22px 24px;
+
+  border: 1px solid #dbe3ea;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+
+.collection-unassigned-card > div {
+  min-width: 0;
+}
+
+
+.collection-unassigned-label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+
+.collection-unassigned-count {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #0f172a;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+
+.collection-unassigned-card p {
+  margin: 0;
+
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+
+@media (max-width: 650px) {
+  .collection-unassigned-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .collection-unassigned-card
+    .collection-view-link {
+    width: 100%;
+  }
+}

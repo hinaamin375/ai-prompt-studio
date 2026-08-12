@@ -1,24 +1,56 @@
-import type { PropsWithChildren } from "react";
-import { NavLink } from "react-router-dom";
+import type {
+  PropsWithChildren,
+} from "react";
 
-export function AppLayout({ children }: PropsWithChildren) {
+import {
+  NavLink,
+} from "react-router-dom";
+
+
+export function AppLayout({
+  children,
+}: PropsWithChildren) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div>
-          <h1>Prompt Studio</h1>
-          <p>AI prompt development</p>
+          <h1>
+            Prompt Studio
+          </h1>
+
+          <p>
+            AI prompt development
+          </p>
         </div>
 
+
         <nav aria-label="Main navigation">
-          <NavLink to="/">Dashboard</NavLink>
-          <NavLink to="/prompts">Prompts</NavLink>
-          <NavLink to="/comparisons">Comparisons</NavLink>
-          <NavLink to="/settings">Settings</NavLink>
+          <NavLink to="/">
+            Dashboard
+          </NavLink>
+
+          <NavLink to="/prompts">
+            Prompts
+          </NavLink>
+
+          <NavLink to="/collections">
+            Collections
+          </NavLink>
+
+          <NavLink to="/comparisons">
+            Comparisons
+          </NavLink>
+
+          <NavLink to="/settings">
+            Settings
+          </NavLink>
         </nav>
       </aside>
 
-      <main className="main-content">{children}</main>
+
+      <main className="main-content">
+        {children}
+      </main>
     </div>
   );
 }
