@@ -60,6 +60,21 @@ export function DashboardPage() {
   const recentPrompts =
     getRecentPrompts(prompts);
 
+  const collectionOverview =
+  collections.map((collection) => ({
+    ...collection,
+    promptCount: prompts.filter(
+      (prompt) =>
+        prompt.collection_id === collection.id,
+    ).length,
+  }));
+
+ const unassignedPromptCount =
+  prompts.filter(
+    (prompt) =>
+      prompt.collection_id === null,
+  ).length;
+
   const isLoading =
     promptsQuery.isPending ||
     collectionsQuery.isPending;
@@ -415,6 +430,77 @@ export function DashboardPage() {
               </Link>
             </div>
           </section>
+          <section className="card dashboard-collections">
+  <div className="dashboard-section-header">
+    <div>
+      <h2>
+        Collection Overview
+      </h2>
+
+      <p>
+        See how your prompts are organized.
+      </p>
+    </div>
+
+    <Link
+      to="/collections"
+      className="dashboard-text-link"
+    >
+      Manage
+    </Link>
+  </div>
+
+  <div className="dashboard-collection-list">
+    {collectionOverview.map(
+      (collection) => (
+        <Link
+          key={collection.id}
+          to="/prompts"
+          className="dashboard-collection-row"
+        >
+          <div className="dashboard-collection-name">
+            <span
+              className="dashboard-collection-icon"
+              aria-hidden="true"
+            >
+              □
+            </span>
+
+            <span>
+              {collection.name}
+            </span>
+          </div>
+
+          <strong>
+            {collection.promptCount}
+          </strong>
+        </Link>
+      ),
+    )}
+
+    <Link
+      to="/prompts"
+      className="dashboard-collection-row"
+    >
+      <div className="dashboard-collection-name">
+        <span
+          className="dashboard-collection-icon"
+          aria-hidden="true"
+        >
+          □
+        </span>
+
+        <span>
+          No collection
+        </span>
+      </div>
+
+      <strong>
+        {unassignedPromptCount}
+      </strong>
+    </Link>
+  </div>
+</section>
 
 
           <section className="card dashboard-workspace">

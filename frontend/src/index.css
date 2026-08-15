@@ -2435,3 +2435,83 @@ box-shadow:
     text-align: left;
   }
 }
+/* =========================================
+   Dashboard Collection Overview
+   ========================================= */
+
+.dashboard-collections {
+  padding: 24px;
+}
+
+.dashboard-collection-list {
+  display: grid;
+}
+
+.dashboard-collection-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 2px;
+  border-bottom: 1px solid #e8edf4;
+  color: #172033;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.dashboard-collection-row:first-child {
+  padding-top: 2px;
+}
+
+.dashboard-collection-row:last-child {
+  padding-bottom: 2px;
+  border-bottom: 0;
+}
+
+.dashboard-collection-row:hover {
+  color: #4f46e5;
+}
+
+.dashboard-collection-name {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+}
+
+.dashboard-collection-name span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-collection-icon {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 0.75rem;
+}
+
+.dashboard-collection-row strong {
+  display: inline-flex;
+  min-width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.78rem;
+}
+
+.dashboard-collection-row:hover strong {
+  background: #eef2ff;
+  color: #4f46e5;
+}
