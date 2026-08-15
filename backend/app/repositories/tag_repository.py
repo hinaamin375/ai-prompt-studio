@@ -36,6 +36,22 @@ class TagRepository:
     ) -> Tag | None:
         return db.get(Tag, tag_id)
 
+    def get_by_ids(
+        self,
+        db: Session,
+        tag_ids: list[int],
+    ) -> list[Tag]:
+        if not tag_ids:
+            return []
+
+        statement = select(Tag).where(
+            Tag.id.in_(tag_ids),
+        )
+
+        return list(
+            db.scalars(statement).all(),
+        )
+
     def get_by_name(
         self,
         db: Session,

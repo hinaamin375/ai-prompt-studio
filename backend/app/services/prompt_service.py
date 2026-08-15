@@ -2,11 +2,15 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import ApplicationError
 from app.models.prompt import Prompt
+from app.models.tag import Tag
 from app.repositories.collection_repository import (
     collection_repository,
 )
 from app.repositories.prompt_repository import (
     prompt_repository,
+)
+from app.repositories.tag_repository import (
+    tag_repository,
 )
 from app.schemas.prompt import (
     PromptCreate,
@@ -54,6 +58,52 @@ class PromptService:
                 status_code=404,
             )
 
+    def _get_tags(
+        self,
+        db: Session,
+        tag_ids: list[int],
+    ) -> list[Tag]:
+        """
+        Resolve tag IDs into Tag objects.
+
+        Duplicate IDs are ignored while preserving the order
+        supplied by the client.
+        """
+        if not tag_ids:
+            return []
+
+        unique_tag_ids = list(
+            dict.fromkeys(tag_ids),
+        )
+
+        tags = tag_repository.get_by_ids(
+            db,
+            unique_tag_ids,
+        )
+
+        tags_by_id = {
+            tag.id: tag
+            for tag in tags
+        }
+
+        missing_tag_ids = [
+            tag_id
+            for tag_id in unique_tag_ids
+            if tag_id not in tags_by_id
+        ]
+
+        if missing_tag_ids:
+            raise ApplicationError(
+                "One or more requested tags were not found.",
+                code="tag_not_found",
+                status_code=404,
+            )
+
+        return [
+            tags_by_id[tag_id]
+            for tag_id in unique_tag_ids
+        ]
+
     def _has_versioned_changes(
         self,
         prompt: Prompt,
@@ -62,8 +112,8 @@ class PromptService:
         """
         Determine whether this update changes prompt content.
 
-        Favorite and collection-only changes deliberately do not
-        create history entries.
+        Favorite, collection, and tag-only changes deliberately
+        do not create history entries.
         """
         for field in VERSIONED_FIELDS:
             if field not in update_data:
@@ -87,6 +137,11 @@ class PromptService:
             data.collection_id,
         )
 
+        tags = self._get_tags(
+            db,
+            list(data.tag_ids),
+        )
+
         prompt = Prompt(
             title=data.title.strip(),
             description=data.description,
@@ -94,6 +149,7 @@ class PromptService:
             user_prompt=data.user_prompt,
             favorite=data.favorite,
             collection_id=data.collection_id,
+            tags=tags,
         )
 
         return prompt_repository.create(
@@ -145,6 +201,19 @@ class PromptService:
             exclude_unset=True,
         )
 
+        tag_ids = update_data.pop(
+            "tag_ids",
+            None,
+        )
+
+        tags: list[Tag] | None = None
+
+        if tag_ids is not None:
+            tags = self._get_tags(
+                db,
+                tag_ids,
+            )
+
         if "title" in update_data:
             title = update_data["title"]
 
@@ -180,6 +249,9 @@ class PromptService:
                 field,
                 value,
             )
+
+        if tags is not None:
+            prompt.tags = tags
 
         return prompt_repository.update(
             db,

@@ -1,5 +1,8 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import (
+    Session,
+    selectinload,
+)
 
 from app.models.prompt import Prompt
 
@@ -20,8 +23,14 @@ class PromptRepository:
         self,
         db: Session,
     ) -> list[Prompt]:
-        statement = select(Prompt).order_by(
-            Prompt.updated_at.desc(),
+        statement = (
+            select(Prompt)
+            .options(
+                selectinload(Prompt.tags),
+            )
+            .order_by(
+                Prompt.updated_at.desc(),
+            )
         )
 
         return list(
@@ -33,7 +42,17 @@ class PromptRepository:
         db: Session,
         prompt_id: int,
     ) -> Prompt | None:
-        return db.get(Prompt, prompt_id)
+        statement = (
+            select(Prompt)
+            .options(
+                selectinload(Prompt.tags),
+            )
+            .where(
+                Prompt.id == prompt_id,
+            )
+        )
+
+        return db.scalar(statement)
 
     def update(
         self,

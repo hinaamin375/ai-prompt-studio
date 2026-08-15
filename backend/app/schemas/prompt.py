@@ -4,7 +4,10 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    PositiveInt,
 )
+
+from app.schemas.tag import TagResponse
 
 
 class PromptBase(BaseModel):
@@ -29,7 +32,9 @@ class PromptBase(BaseModel):
 
 
 class PromptCreate(PromptBase):
-    pass
+    tag_ids: list[PositiveInt] = Field(
+        default_factory=list,
+    )
 
 
 class PromptUpdate(BaseModel):
@@ -54,6 +59,10 @@ class PromptUpdate(BaseModel):
         gt=0,
     )
 
+    tag_ids: list[PositiveInt] = Field(
+        default_factory=list,
+    )
+
 
 class PromptResponse(PromptBase):
     model_config = ConfigDict(
@@ -63,3 +72,7 @@ class PromptResponse(PromptBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
+    tags: list[TagResponse] = Field(
+        default_factory=list,
+    )
