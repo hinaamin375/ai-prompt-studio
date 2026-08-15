@@ -11,6 +11,7 @@ from app.api.routes import (
     comparisons_router,
     health_router,
     prompts_router,
+    tags_router,
 )
 from app.core.config import settings
 from app.core.exceptions import ApplicationError
@@ -110,6 +111,10 @@ app.include_router(
     prefix=settings.api_v1_prefix,
 )
 
+app.include_router(
+    tags_router,
+    prefix=settings.api_v1_prefix,
+)
 
 @app.get(
     "/",

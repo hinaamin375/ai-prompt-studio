@@ -1,7 +1,18 @@
-from .collections import router as collections_router
-from .comparisons import router as comparisons_router
-from .health import router as health_router
-from .prompts import router as prompts_router
+from .collections import (
+    router as collections_router,
+)
+from .comparisons import (
+    router as comparisons_router,
+)
+from .health import (
+    router as health_router,
+)
+from .prompts import (
+    router as prompts_router,
+)
+from .tags import (
+    router as tags_router,
+)
 
 
 __all__ = [
@@ -9,4 +20,5 @@ __all__ = [
     "comparisons_router",
     "health_router",
     "prompts_router",
+    "tags_router",
 ]
