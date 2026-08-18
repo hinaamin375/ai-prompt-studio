@@ -2583,3 +2583,19 @@ box-shadow:
   font-weight: 600;
   line-height: 1;
 }
+/* Prompt library tag filter */
+
+.prompt-tag-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prompt-tag-filter-field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.prompt-tag-filter-field select {
+  min-width: 150px;
+}

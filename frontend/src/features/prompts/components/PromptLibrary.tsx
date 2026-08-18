@@ -18,6 +18,9 @@ import {
 import {
   useCollections,
 } from "../hooks/useCollections";
+import {
+  useTags,
+} from "../hooks/useTags";
 
 import {
   usePromptSelection,
@@ -168,12 +171,19 @@ export function PromptLibrary({
     searchParams.get("collection") ??
     "all";
 
+  const tagFilter =
+    searchParams.get("tag") ??
+    "all";
 
   const {
     data: collections = [],
     isLoading: collectionsLoading,
   } = useCollections();
 
+  const {
+    data: tags = [],
+    isLoading: tagsLoading,
+  } = useTags();
 
   const visiblePrompts = useMemo(() => {
     const filteredPrompts =
@@ -209,12 +219,27 @@ export function PromptLibrary({
             prompt.collection_id ===
               collectionId;
         }
+let matchesTag = true;
 
+if (tagFilter === "none") {
+  matchesTag =
+    prompt.tags.length === 0;
+} else if (tagFilter !== "all") {
+  const tagId =
+    Number(tagFilter);
+
+  matchesTag =
+    Number.isFinite(tagId) &&
+    prompt.tags.some(
+      (tag) => tag.id === tagId,
+    );
+}
 
         return (
           matchesText &&
           matchesFavorite &&
-          matchesCollection
+          matchesCollection &&
+            matchesTag
         );
       });
 
@@ -229,6 +254,7 @@ export function PromptLibrary({
     sortOption,
     favoritesOnly,
     collectionFilter,
+    tagFilter,
   ]);
 
 
@@ -261,7 +287,8 @@ export function PromptLibrary({
     searchTerm.trim().length > 0 ||
     sortOption !== "updated-desc" ||
     favoritesOnly ||
-    collectionFilter !== "all";
+    collectionFilter !== "all" ||
+    tagFilter !== "all";
 
 
   function handleCollectionFilterChange(
@@ -292,7 +319,34 @@ export function PromptLibrary({
 
     clearSelection();
   }
+function handleTagFilterChange(
+  value: string,
+): void {
+  const nextParams =
+    new URLSearchParams(
+      searchParams,
+    );
 
+  if (value === "all") {
+    nextParams.delete(
+      "tag",
+    );
+  } else {
+    nextParams.set(
+      "tag",
+      value,
+    );
+  }
+
+  setSearchParams(
+    nextParams,
+    {
+      replace: true,
+    },
+  );
+
+  clearSelection();
+}
 
   function clearFilters(): void {
     setSearchTerm("");
@@ -307,6 +361,9 @@ export function PromptLibrary({
     nextParams.delete(
       "collection",
     );
+    nextParams.delete(
+  "tag",
+);
 
     setSearchParams(
       nextParams,
@@ -351,6 +408,15 @@ export function PromptLibrary({
         collectionsLoading={
           collectionsLoading
         }
+        tagFilter={
+  tagFilter
+}
+tags={
+  tags
+}
+tagsLoading={
+  tagsLoading
+}
         hasActiveFilters={
           hasActiveFilters
         }
@@ -368,6 +434,9 @@ export function PromptLibrary({
         onCollectionFilterChange={
           handleCollectionFilterChange
         }
+        onTagFilterChange={
+  handleTagFilterChange
+}
         onClearFilters={
           clearFilters
         }

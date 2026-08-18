@@ -1,4 +1,5 @@
 import type { Collection } from "../../../types/collection";
+import type { Tag } from "../../../types/tag";
 
 
 interface PromptToolbarProps {
@@ -9,6 +10,10 @@ interface PromptToolbarProps {
   collectionFilter: string;
   collections: Collection[];
   collectionsLoading: boolean;
+
+  tagFilter: string;
+  tags: Tag[];
+  tagsLoading: boolean;
 
   hasActiveFilters: boolean;
 
@@ -23,6 +28,10 @@ interface PromptToolbarProps {
     value: string,
   ): void;
 
+  onTagFilterChange(
+    value: string,
+  ): void;
+
   onClearFilters(): void;
 }
 
@@ -34,11 +43,15 @@ export function PromptToolbar({
   collectionFilter,
   collections,
   collectionsLoading,
+  tagFilter,
+  tags,
+  tagsLoading,
   hasActiveFilters,
   onSearchChange,
   onSortChange,
   onFavoritesOnlyChange,
   onCollectionFilterChange,
+  onTagFilterChange,
   onClearFilters,
 }: PromptToolbarProps) {
   return (
@@ -60,7 +73,6 @@ export function PromptToolbar({
           }
         />
       </div>
-
 
       <div className="prompt-sort-field">
         <label htmlFor="prompt-sort">
@@ -97,7 +109,6 @@ export function PromptToolbar({
           </option>
         </select>
       </div>
-
 
       <div className="prompt-collection-field">
         <label htmlFor="prompt-collection-filter">
@@ -137,6 +148,39 @@ export function PromptToolbar({
         </select>
       </div>
 
+      <div className="prompt-tag-filter-field">
+        <label htmlFor="prompt-tag-filter">
+          Tag
+        </label>
+
+        <select
+          id="prompt-tag-filter"
+          value={tagFilter}
+          disabled={tagsLoading}
+          onChange={(event) =>
+            onTagFilterChange(
+              event.target.value,
+            )
+          }
+        >
+          <option value="all">
+            All tags
+          </option>
+
+          <option value="none">
+            No tags
+          </option>
+
+          {tags.map((tag) => (
+            <option
+              key={tag.id}
+              value={String(tag.id)}
+            >
+              {tag.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <label className="favorites-filter">
         <input
@@ -151,7 +195,6 @@ export function PromptToolbar({
 
         <span>Favorites only</span>
       </label>
-
 
       {hasActiveFilters && (
         <button
