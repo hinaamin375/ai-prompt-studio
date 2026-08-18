@@ -55,134 +55,129 @@ export function PromptToolbar({
   onClearFilters,
 }: PromptToolbarProps) {
   return (
-    <div className="prompt-library-toolbar">
-      <div className="prompt-search-field">
-        <label htmlFor="prompt-search">
-          Search prompts
-        </label>
+  <div className="library-filterbar">
+    <div className="library-filterbar__search">
+      <label htmlFor="prompt-search">
+        Search prompts
+      </label>
 
-        <input
-          id="prompt-search"
-          type="search"
-          value={searchTerm}
-          placeholder="Search by title, description, or prompt text..."
-          onChange={(event) =>
-            onSearchChange(
-              event.target.value,
-            )
-          }
-        />
-      </div>
+      <input
+        id="prompt-search"
+        type="search"
+        value={searchTerm}
+        placeholder="Search by title, description, or prompt text..."
+        onChange={(event) =>
+          onSearchChange(event.target.value)
+        }
+      />
+    </div>
 
-      <div className="prompt-sort-field">
-        <label htmlFor="prompt-sort">
-          Sort by
-        </label>
+    <div className="library-filterbar__field">
+      <label htmlFor="prompt-sort">
+        Sort by
+      </label>
 
-        <select
-          id="prompt-sort"
-          value={sortOption}
-          onChange={(event) =>
-            onSortChange(
-              event.target.value,
-            )
-          }
-        >
-          <option value="updated-desc">
-            Recently updated
+      <select
+        id="prompt-sort"
+        value={sortOption}
+        onChange={(event) =>
+          onSortChange(event.target.value)
+        }
+      >
+        <option value="updated-desc">
+          Recently updated
+        </option>
+
+        <option value="created-desc">
+          Newest first
+        </option>
+
+        <option value="created-asc">
+          Oldest first
+        </option>
+
+        <option value="title-asc">
+          Title A–Z
+        </option>
+
+        <option value="title-desc">
+          Title Z–A
+        </option>
+      </select>
+    </div>
+
+    <div className="library-filterbar__field">
+      <label htmlFor="prompt-collection-filter">
+        Collection
+      </label>
+
+      <select
+        id="prompt-collection-filter"
+        value={collectionFilter}
+        disabled={collectionsLoading}
+        onChange={(event) =>
+          onCollectionFilterChange(
+            event.target.value,
+          )
+        }
+      >
+        <option value="all">
+          All collections
+        </option>
+
+        <option value="none">
+          No collection
+        </option>
+
+        {collections.map((collection) => (
+          <option
+            key={collection.id}
+            value={String(collection.id)}
+          >
+            {collection.name}
           </option>
+        ))}
+      </select>
+    </div>
 
-          <option value="created-desc">
-            Newest first
+    <div className="library-filterbar__field">
+      <label htmlFor="prompt-tag-filter">
+        Tag
+      </label>
+
+      <select
+        id="prompt-tag-filter"
+        value={tagFilter}
+        disabled={tagsLoading}
+        onChange={(event) =>
+          onTagFilterChange(event.target.value)
+        }
+      >
+        <option value="all">
+          All tags
+        </option>
+
+        <option value="none">
+          No tags
+        </option>
+
+        {tags.map((tag) => (
+          <option
+            key={tag.id}
+            value={String(tag.id)}
+          >
+            {tag.name}
           </option>
+        ))}
+      </select>
+    </div>
 
-          <option value="created-asc">
-            Oldest first
-          </option>
+    <div className="library-filterbar__favorite">
+      <span className="library-filterbar__spacer">
+        &nbsp;
+      </span>
 
-          <option value="title-asc">
-            Title A–Z
-          </option>
-
-          <option value="title-desc">
-            Title Z–A
-          </option>
-        </select>
-      </div>
-
-      <div className="prompt-collection-field">
-        <label htmlFor="prompt-collection-filter">
-          Collection
-        </label>
-
-        <select
-          id="prompt-collection-filter"
-          value={collectionFilter}
-          disabled={collectionsLoading}
-          onChange={(event) =>
-            onCollectionFilterChange(
-              event.target.value,
-            )
-          }
-        >
-          <option value="all">
-            All collections
-          </option>
-
-          <option value="none">
-            No collection
-          </option>
-
-          {collections.map(
-            (collection) => (
-              <option
-                key={collection.id}
-                value={String(
-                  collection.id,
-                )}
-              >
-                {collection.name}
-              </option>
-            ),
-          )}
-        </select>
-      </div>
-
-      <div className="prompt-tag-filter-field">
-        <label htmlFor="prompt-tag-filter">
-          Tag
-        </label>
-
-        <select
-          id="prompt-tag-filter"
-          value={tagFilter}
-          disabled={tagsLoading}
-          onChange={(event) =>
-            onTagFilterChange(
-              event.target.value,
-            )
-          }
-        >
-          <option value="all">
-            All tags
-          </option>
-
-          <option value="none">
-            No tags
-          </option>
-
-          {tags.map((tag) => (
-            <option
-              key={tag.id}
-              value={String(tag.id)}
-            >
-              {tag.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <label className="favorites-filter">
+      <label className="library-filterbar__favorite-control">
         <input
           type="checkbox"
           checked={favoritesOnly}
@@ -195,16 +190,21 @@ export function PromptToolbar({
 
         <span>Favorites only</span>
       </label>
+    </div>
 
-      {hasActiveFilters && (
+    {hasActiveFilters && (
+      <div className="library-filterbar__clear">
+        <span className="library-filterbar__spacer">
+          &nbsp;
+        </span>
+
         <button
           type="button"
-          className="secondary-button prompt-clear-button"
           onClick={onClearFilters}
         >
-          Clear filters
+          Clear
         </button>
-      )}
-    </div>
-  );
-}
+      </div>
+    )}
+  </div>
+);}
