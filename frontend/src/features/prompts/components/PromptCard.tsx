@@ -95,7 +95,21 @@ export function PromptCard({
   </div>
 )}
 
-
+{prompt.tags.length > 0 && (
+  <div
+    className="prompt-card-tags"
+    aria-label="Prompt tags"
+  >
+    {prompt.tags.map((tag) => (
+      <span
+        key={tag.id}
+        className="prompt-card-tag"
+      >
+        {tag.name}
+      </span>
+    ))}
+  </div>
+)}
         <p>
           {prompt.description?.trim() ||
             "No description provided."}

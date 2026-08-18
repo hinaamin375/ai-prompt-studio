@@ -136,6 +136,10 @@ export function EditPromptPage() {
       promptQuery.data.user_prompt,
       collection_id:
   promptQuery.data.collection_id,
+   tag_ids:
+    promptQuery.data.tags.map(
+      (tag) => tag.id,
+    ),
   };
 
   return (

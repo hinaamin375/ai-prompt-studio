@@ -2515,3 +2515,71 @@ box-shadow:
   background: #eef2ff;
   color: #4f46e5;
 }
+/* Prompt tag selector */
+
+.form-field-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.prompt-tag-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.prompt-tag-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  padding: 0.45rem 0.75rem;
+
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 999px;
+
+  background: transparent;
+  color: inherit;
+
+  font: inherit;
+  font-size: 0.875rem;
+
+  cursor: pointer;
+}
+
+.prompt-tag-option:hover {
+  border-color: currentColor;
+}
+
+.prompt-tag-option.selected {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
+}
+/* Prompt card tags */
+
+.prompt-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.prompt-card-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.65rem;
+  padding: 0.2rem 0.6rem;
+
+  border: 1px solid #d7ddea;
+  border-radius: 999px;
+
+  background: #f7f8fc;
+
+  color: #4f5f78;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}

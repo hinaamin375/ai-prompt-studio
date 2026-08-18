@@ -1,3 +1,6 @@
+import type { Tag } from "./tag";
+
+
 export interface Prompt {
   id: number;
   title: string;
@@ -6,6 +9,7 @@ export interface Prompt {
   user_prompt: string;
   favorite: boolean;
   collection_id: number | null;
+  tags: Tag[];
   created_at: string;
   updated_at: string;
 }
@@ -18,6 +22,7 @@ export interface PromptCreate {
   user_prompt: string;
   favorite?: boolean;
   collection_id?: number | null;
+  tag_ids?: number[];
 }
 
 
@@ -28,4 +33,5 @@ export interface PromptUpdate {
   user_prompt?: string;
   favorite?: boolean;
   collection_id?: number | null;
+  tag_ids?: number[];
 }

@@ -1,9 +1,12 @@
-import { useForm } from "react-hook-form";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+
 import type {
   PromptCreate,
 } from "../../types/prompt";
+
 import { useCollections } from "./hooks/useCollections";
+import { useTags } from "./hooks/useTags";
 
 
 interface PromptFormProps {
@@ -22,6 +25,7 @@ const defaultValues: PromptCreate = {
   system_prompt: "",
   user_prompt: "",
   collection_id: null,
+  tag_ids: [],
 };
 
 
@@ -38,24 +42,67 @@ export function PromptForm({
   } = useCollections();
 
   const {
+    data: tags = [],
+    isLoading: tagsLoading,
+    isError: tagsError,
+  } = useTags();
+
+  const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<PromptCreate>({
     defaultValues: initialValues,
   });
-  useEffect(() => {
-  reset(initialValues);
-}, [
-  initialValues.title,
-  initialValues.description,
-  initialValues.system_prompt,
-  initialValues.user_prompt,
-  initialValues.collection_id,
-  reset,
-]);
 
+  const selectedTagIds =
+    watch("tag_ids") ?? [];
+
+  useEffect(() => {
+    reset({
+      ...initialValues,
+      tag_ids:
+        initialValues.tag_ids ?? [],
+    });
+  }, [
+    initialValues.title,
+    initialValues.description,
+    initialValues.system_prompt,
+    initialValues.user_prompt,
+    initialValues.collection_id,
+    initialValues.tag_ids,
+    reset,
+  ]);
+
+  function toggleTag(
+    tagId: number,
+  ): void {
+    const currentTagIds =
+      selectedTagIds ?? [];
+
+    const isSelected =
+      currentTagIds.includes(tagId);
+
+    const nextTagIds = isSelected
+      ? currentTagIds.filter(
+          (id) => id !== tagId,
+        )
+      : [
+          ...currentTagIds,
+          tagId,
+        ];
+
+    setValue(
+      "tag_ids",
+      nextTagIds,
+      {
+        shouldDirty: true,
+      },
+    );
+  }
 
   async function handleFormSubmit(
     values: PromptCreate,
@@ -64,9 +111,10 @@ export function PromptForm({
       ...values,
       collection_id:
         values.collection_id ?? null,
+      tag_ids:
+        values.tag_ids ?? [],
     });
   }
-
 
   return (
     <form
@@ -98,7 +146,6 @@ export function PromptForm({
         )}
       </div>
 
-
       <div className="form-field">
         <label htmlFor="description">
           Description
@@ -110,7 +157,6 @@ export function PromptForm({
           {...register("description")}
         />
       </div>
-
 
       <div className="form-field">
         <label htmlFor="collection">
@@ -164,6 +210,77 @@ export function PromptForm({
         )}
       </div>
 
+      <div className="form-field">
+        <span className="form-field-label">
+          Tags
+        </span>
+
+        {tagsLoading && (
+          <p className="field-help">
+            Loading tags...
+          </p>
+        )}
+
+        {tagsError && (
+          <p className="field-error">
+            Tags could not be loaded.
+          </p>
+        )}
+
+        {!tagsLoading &&
+          !tagsError &&
+          tags.length === 0 && (
+            <p className="field-help">
+              No tags have been created yet.
+            </p>
+          )}
+
+        {!tagsLoading &&
+          !tagsError &&
+          tags.length > 0 && (
+            <div className="prompt-tag-selector">
+              {tags.map((tag) => {
+                const selected =
+                  selectedTagIds.includes(
+                    tag.id,
+                  );
+
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    className={
+                      selected
+                        ? "prompt-tag-option selected"
+                        : "prompt-tag-option"
+                    }
+                    aria-pressed={selected}
+                    onClick={() =>
+                      toggleTag(tag.id)
+                    }
+                  >
+                    <span>
+                      {tag.name}
+                    </span>
+
+                    {selected && (
+                      <span
+                        aria-hidden="true"
+                      >
+                        ×
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+        <p className="field-help">
+          Select one or more tags for this
+          prompt.
+        </p>
+      </div>
 
       <div className="form-field">
         <label htmlFor="system-prompt">
@@ -183,7 +300,6 @@ export function PromptForm({
         </p>
       </div>
 
-
       <div className="form-field">
         <label htmlFor="user-prompt">
           User prompt
@@ -192,9 +308,10 @@ export function PromptForm({
         <textarea
           id="user-prompt"
           rows={12}
-          placeholder="Summarize the following text: {{text}}"
+          placeholder="Summarize the following text:{{text}}"
           {...register("user_prompt", {
-            required: "User prompt is required.",
+            required:
+              "User prompt is required.",
           })}
         />
 
@@ -204,7 +321,6 @@ export function PromptForm({
           </p>
         )}
       </div>
-
 
       <div className="form-actions">
         <button
