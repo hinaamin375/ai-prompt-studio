@@ -33,6 +33,8 @@ def test_get_missing_prompt_returns_404() -> None:
     assert response.status_code == 404
 
     assert response.json()["error"]["code"] == ("prompt_not_found")
+
+
 def test_duplicate_prompt() -> None:
     create_response = client.post(
         "/api/v1/prompts",
@@ -59,31 +61,17 @@ def test_duplicate_prompt() -> None:
 
     assert duplicate["id"] != original["id"]
 
-    assert duplicate["title"] == (
-        "Original Prompt (Copy)"
-    )
+    assert duplicate["title"] == ("Original Prompt (Copy)")
 
-    assert (
-        duplicate["description"]
-        == original["description"]
-    )
+    assert duplicate["description"] == original["description"]
 
-    assert (
-        duplicate["system_prompt"]
-        == original["system_prompt"]
-    )
+    assert duplicate["system_prompt"] == original["system_prompt"]
 
-    assert (
-        duplicate["user_prompt"]
-        == original["user_prompt"]
-    )
+    assert duplicate["user_prompt"] == original["user_prompt"]
 
     assert duplicate["favorite"] is False
 
-    assert (
-        duplicate["collection_id"]
-        == original["collection_id"]
-    )
+    assert duplicate["collection_id"] == original["collection_id"]
 
 
 def test_duplicate_missing_prompt_returns_404() -> None:
@@ -93,7 +81,4 @@ def test_duplicate_missing_prompt_returns_404() -> None:
 
     assert response.status_code == 404
 
-    assert (
-        response.json()["error"]["code"]
-        == "prompt_not_found"
-    )
+    assert response.json()["error"]["code"] == "prompt_not_found"

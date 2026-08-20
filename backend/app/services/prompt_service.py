@@ -44,11 +44,9 @@ class PromptService:
         if collection_id is None:
             return
 
-        collection = (
-            collection_repository.get_by_id(
-                db,
-                collection_id,
-            )
+        collection = collection_repository.get_by_id(
+            db,
+            collection_id,
         )
 
         if collection is None:
@@ -81,15 +79,10 @@ class PromptService:
             unique_tag_ids,
         )
 
-        tags_by_id = {
-            tag.id: tag
-            for tag in tags
-        }
+        tags_by_id = {tag.id: tag for tag in tags}
 
         missing_tag_ids = [
-            tag_id
-            for tag_id in unique_tag_ids
-            if tag_id not in tags_by_id
+            tag_id for tag_id in unique_tag_ids if tag_id not in tags_by_id
         ]
 
         if missing_tag_ids:
@@ -99,10 +92,7 @@ class PromptService:
                 status_code=404,
             )
 
-        return [
-            tags_by_id[tag_id]
-            for tag_id in unique_tag_ids
-        ]
+        return [tags_by_id[tag_id] for tag_id in unique_tag_ids]
 
     def _has_versioned_changes(
         self,
@@ -119,10 +109,7 @@ class PromptService:
             if field not in update_data:
                 continue
 
-            if (
-                getattr(prompt, field)
-                != update_data[field]
-            ):
+            if getattr(prompt, field) != update_data[field]:
                 return True
 
         return False
@@ -175,30 +162,15 @@ class PromptService:
         )
 
         copy_suffix = " (Copy)"
-        max_base_length = (
-            200 - len(copy_suffix)
-        )
+        max_base_length = 200 - len(copy_suffix)
 
         duplicate = Prompt(
-            title=(
-                source_prompt.title[
-                    :max_base_length
-                ]
-                + copy_suffix
-            ),
-            description=(
-                source_prompt.description
-            ),
-            system_prompt=(
-                source_prompt.system_prompt
-            ),
-            user_prompt=(
-                source_prompt.user_prompt
-            ),
+            title=(source_prompt.title[:max_base_length] + copy_suffix),
+            description=(source_prompt.description),
+            system_prompt=(source_prompt.system_prompt),
+            user_prompt=(source_prompt.user_prompt),
             favorite=False,
-            collection_id=(
-                source_prompt.collection_id
-            ),
+            collection_id=(source_prompt.collection_id),
             tags=list(
                 source_prompt.tags,
             ),
@@ -208,7 +180,7 @@ class PromptService:
             db,
             duplicate,
         )
-    
+
     def list_prompts(
         self,
         db: Session,
@@ -222,11 +194,9 @@ class PromptService:
         db: Session,
         prompt_id: int,
     ) -> Prompt:
-        prompt = (
-            prompt_repository.get_by_id(
-                db,
-                prompt_id,
-            )
+        prompt = prompt_repository.get_by_id(
+            db,
+            prompt_id,
         )
 
         if prompt is None:
@@ -270,23 +240,17 @@ class PromptService:
             title = update_data["title"]
 
             if title is not None:
-                update_data["title"] = (
-                    title.strip()
-                )
+                update_data["title"] = title.strip()
 
         if "collection_id" in update_data:
             self._validate_collection(
                 db,
-                update_data[
-                    "collection_id"
-                ],
+                update_data["collection_id"],
             )
 
-        has_versioned_changes = (
-            self._has_versioned_changes(
-                prompt,
-                update_data,
-            )
+        has_versioned_changes = self._has_versioned_changes(
+            prompt,
+            update_data,
         )
 
         if has_versioned_changes:

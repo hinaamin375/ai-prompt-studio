@@ -106,10 +106,7 @@ def test_versions_are_returned_newest_first() -> None:
 
     versions = response.json()
 
-    assert [
-        version["version"]
-        for version in versions
-    ] == [2, 1]
+    assert [version["version"] for version in versions] == [2, 1]
 
 
 def test_favorite_only_update_does_not_create_version() -> None:
@@ -200,18 +197,9 @@ def test_get_specific_version() -> None:
 
     assert version["version"] == 1
     assert version["title"] == "Original title"
-    assert (
-        version["description"]
-        == "Original description"
-    )
-    assert (
-        version["system_prompt"]
-        == "Original system prompt"
-    )
-    assert (
-        version["user_prompt"]
-        == "Original user prompt"
-    )
+    assert version["description"] == "Original description"
+    assert version["system_prompt"] == "Original system prompt"
+    assert version["user_prompt"] == "Original user prompt"
 
 
 def test_missing_version_returns_404() -> None:
@@ -225,10 +213,7 @@ def test_missing_version_returns_404() -> None:
 
     body = response.json()
 
-    assert (
-        body["error"]["code"]
-        == "prompt_version_not_found"
-    )
+    assert body["error"]["code"] == "prompt_version_not_found"
 
 
 def test_missing_prompt_versions_returns_404() -> None:
@@ -240,10 +225,7 @@ def test_missing_prompt_versions_returns_404() -> None:
 
     body = response.json()
 
-    assert (
-        body["error"]["code"]
-        == "prompt_not_found"
-    )
+    assert body["error"]["code"] == "prompt_not_found"
 
 
 def test_restore_version_restores_old_content() -> None:
@@ -267,14 +249,8 @@ def test_restore_version_restores_old_content() -> None:
     restored = response.json()
 
     assert restored["title"] == "Original title"
-    assert (
-        restored["description"]
-        == "Original description"
-    )
-    assert (
-        restored["user_prompt"]
-        == "Original user prompt"
-    )
+    assert restored["description"] == "Original description"
+    assert restored["user_prompt"] == "Original user prompt"
 
 
 def test_restore_preserves_current_state_as_new_version() -> None:
@@ -306,10 +282,7 @@ def test_restore_preserves_current_state_as_new_version() -> None:
 
     versions = versions_response.json()
 
-    assert [
-        version["version"]
-        for version in versions
-    ] == [3, 2, 1]
+    assert [version["version"] for version in versions] == [3, 2, 1]
 
     assert versions[0]["title"] == "Third state"
 
@@ -346,10 +319,7 @@ def test_restoring_current_equivalent_version_does_not_duplicate_history() -> No
         f"/api/v1/prompts/{prompt['id']}/versions",
     )
 
-    assert (
-        len(after_response.json())
-        == before_count
-    )
+    assert len(after_response.json()) == before_count
 
 
 def test_deleting_prompt_deletes_versions() -> None:
@@ -366,9 +336,12 @@ def test_deleting_prompt_deletes_versions() -> None:
         f"/api/v1/prompts/{prompt['id']}/versions",
     )
 
-    assert len(
-        versions_response.json(),
-    ) == 1
+    assert (
+        len(
+            versions_response.json(),
+        )
+        == 1
+    )
 
     delete_response = client.delete(
         f"/api/v1/prompts/{prompt['id']}",

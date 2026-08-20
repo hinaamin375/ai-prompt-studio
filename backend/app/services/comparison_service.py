@@ -65,13 +65,11 @@ class PromptComparisonService:
         )
 
         left_text = "\n".join(
-            message.content
-            for message in left.rendered_document.messages
+            message.content for message in left.rendered_document.messages
         )
 
         right_text = "\n".join(
-            message.content
-            for message in right.rendered_document.messages
+            message.content for message in right.rendered_document.messages
         )
 
         similarity = self.calculate_similarity(
@@ -81,25 +79,14 @@ class PromptComparisonService:
 
         summary = PromptComparisonSummary(
             character_difference=(
-                right.statistics.characters
-                - left.statistics.characters
+                right.statistics.characters - left.statistics.characters
             ),
-            word_difference=(
-                right.statistics.words
-                - left.statistics.words
-            ),
-            line_difference=(
-                right.statistics.lines
-                - left.statistics.lines
-            ),
+            word_difference=(right.statistics.words - left.statistics.words),
+            line_difference=(right.statistics.lines - left.statistics.lines),
             token_difference=(
-                right.statistics.estimated_tokens
-                - left.statistics.estimated_tokens
+                right.statistics.estimated_tokens - left.statistics.estimated_tokens
             ),
-            variable_difference=(
-                len(right.variables)
-                - len(left.variables)
-            ),
+            variable_difference=(len(right.variables) - len(left.variables)),
             similarity=similarity,
         )
 

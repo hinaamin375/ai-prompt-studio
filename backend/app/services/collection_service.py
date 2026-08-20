@@ -26,11 +26,9 @@ class CollectionService:
                 status_code=400,
             )
 
-        existing_collection = (
-            collection_repository.get_by_name(
-                db,
-                name,
-            )
+        existing_collection = collection_repository.get_by_name(
+            db,
+            name,
         )
 
         if existing_collection is not None:
@@ -60,11 +58,9 @@ class CollectionService:
         db: Session,
         collection_id: int,
     ) -> Collection:
-        collection = (
-            collection_repository.get_by_id(
-                db,
-                collection_id,
-            )
+        collection = collection_repository.get_by_id(
+            db,
+            collection_id,
         )
 
         if collection is None:
@@ -110,17 +106,14 @@ class CollectionService:
                     status_code=400,
                 )
 
-            existing_collection = (
-                collection_repository.get_by_name(
-                    db,
-                    name,
-                )
+            existing_collection = collection_repository.get_by_name(
+                db,
+                name,
             )
 
             if (
                 existing_collection is not None
-                and existing_collection.id
-                != collection.id
+                and existing_collection.id != collection.id
             ):
                 raise ApplicationError(
                     "A collection with this name already exists.",

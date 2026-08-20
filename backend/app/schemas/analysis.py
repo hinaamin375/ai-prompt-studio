@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from app.domain.prompt import PromptDocument
 
+
 class PromptVariableOccurrence(BaseModel):
     """
     Represents one variable occurrence discovered inside a prompt.
@@ -41,6 +42,7 @@ class PromptVariableOccurrence(BaseModel):
         ge=0,
         description="Zero-based end position of the variable.",
     )
+
 
 class PromptStatistics(BaseModel):
     """
@@ -96,6 +98,8 @@ class PromptAnalysis(BaseModel):
     errors: list[str] = Field(
         default_factory=list,
     )
+
+
 class PromptAnalyzeRequest(BaseModel):
     """
     Variable values supplied when analyzing a saved prompt.

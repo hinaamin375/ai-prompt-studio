@@ -13,7 +13,9 @@ from .prompts import (
 from .tags import (
     router as tags_router,
 )
-
+from app.api.routes.providers import (
+    router as providers_router,
+)
 
 __all__ = [
     "collections_router",
@@ -21,4 +23,5 @@ __all__ = [
     "health_router",
     "prompts_router",
     "tags_router",
+    "providers_router",
 ]

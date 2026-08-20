@@ -20,10 +20,7 @@ class TagRepository:
         self,
         db: Session,
     ) -> list[Tag]:
-        statement = (
-            select(Tag)
-            .order_by(Tag.name.asc())
-        )
+        statement = select(Tag).order_by(Tag.name.asc())
 
         return list(
             db.scalars(statement).all(),

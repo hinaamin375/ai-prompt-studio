@@ -19,8 +19,7 @@ class PromptVersionRepository:
                 PromptVersion.version,
             ),
         ).where(
-            PromptVersion.prompt_id
-            == prompt_id,
+            PromptVersion.prompt_id == prompt_id,
         )
 
         latest_version = db.scalar(
@@ -37,11 +36,9 @@ class PromptVersionRepository:
         db: Session,
         prompt: Prompt,
     ) -> PromptVersion:
-        version_number = (
-            self.get_next_version_number(
-                db,
-                prompt.id,
-            )
+        version_number = self.get_next_version_number(
+            db,
+            prompt.id,
         )
 
         version = PromptVersion(
@@ -67,8 +64,7 @@ class PromptVersionRepository:
         statement = (
             select(PromptVersion)
             .where(
-                PromptVersion.prompt_id
-                == prompt_id,
+                PromptVersion.prompt_id == prompt_id,
             )
             .order_by(
                 PromptVersion.version.desc(),
@@ -90,15 +86,11 @@ class PromptVersionRepository:
         statement = select(
             PromptVersion,
         ).where(
-            PromptVersion.prompt_id
-            == prompt_id,
-            PromptVersion.version
-            == version,
+            PromptVersion.prompt_id == prompt_id,
+            PromptVersion.version == version,
         )
 
         return db.scalar(statement)
 
 
-prompt_version_repository = (
-    PromptVersionRepository()
-)
+prompt_version_repository = PromptVersionRepository()

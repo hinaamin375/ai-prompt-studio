@@ -56,9 +56,7 @@ def prepare_database():
         bind=test_engine,
     )
 
-    app.dependency_overrides[get_db] = (
-        override_get_db
-    )
+    app.dependency_overrides[get_db] = override_get_db
 
     yield
 

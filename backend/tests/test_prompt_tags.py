@@ -59,10 +59,7 @@ def test_create_prompt_with_tags() -> None:
 
     assert len(prompt["tags"]) == 2
 
-    assert {
-        tag["name"]
-        for tag in prompt["tags"]
-    } == {
+    assert {tag["name"] for tag in prompt["tags"]} == {
         "writing",
         "resume",
     }
@@ -90,10 +87,7 @@ def test_create_prompt_with_unknown_tag_returns_404() -> None:
 
     data = response.json()
 
-    assert (
-        data["error"]["code"]
-        == "tag_not_found"
-    )
+    assert data["error"]["code"] == "tag_not_found"
 
 
 def test_duplicate_tag_ids_are_ignored() -> None:
@@ -199,10 +193,7 @@ def test_update_with_unknown_tag_returns_404() -> None:
 
     data = response.json()
 
-    assert (
-        data["error"]["code"]
-        == "tag_not_found"
-    )
+    assert data["error"]["code"] == "tag_not_found"
 
 
 def test_list_prompts_returns_tags() -> None:
@@ -346,10 +337,7 @@ def test_duplicate_prompt_preserves_tags() -> None:
 
     assert duplicate["id"] != original["id"]
 
-    assert {
-        tag["name"]
-        for tag in duplicate["tags"]
-    } == {
+    assert {tag["name"] for tag in duplicate["tags"]} == {
         "writing",
         "research",
     }

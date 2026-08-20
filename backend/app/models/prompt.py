@@ -94,6 +94,6 @@ class Prompt(Base):
         passive_deletes=True,
     )
     tags: Mapped[list["Tag"]] = relationship(
-    secondary=prompt_tags,
-    back_populates="prompts",
-)
+        secondary=prompt_tags,
+        back_populates="prompts",
+    )

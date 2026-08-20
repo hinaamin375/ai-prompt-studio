@@ -26,11 +26,9 @@ class TagService:
                 status_code=400,
             )
 
-        existing_tag = (
-            tag_repository.get_by_name(
-                db,
-                name,
-            )
+        existing_tag = tag_repository.get_by_name(
+            db,
+            name,
         )
 
         if existing_tag is not None:
@@ -108,17 +106,12 @@ class TagService:
                     status_code=400,
                 )
 
-            existing_tag = (
-                tag_repository.get_by_name(
-                    db,
-                    name,
-                )
+            existing_tag = tag_repository.get_by_name(
+                db,
+                name,
             )
 
-            if (
-                existing_tag is not None
-                and existing_tag.id != tag.id
-            ):
+            if existing_tag is not None and existing_tag.id != tag.id:
                 raise ApplicationError(
                     "A tag with this name already exists.",
                     code="tag_name_exists",

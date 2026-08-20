@@ -7,7 +7,13 @@ from fastapi import (
     status,
 )
 from sqlalchemy.orm import Session
-
+from app.schemas.prompt_run import (
+    PromptRunRequest,
+    PromptRunResponse,
+)
+from app.services.prompt_run_service import (
+    prompt_run_service,
+)
 from app.db.session import get_db
 from app.schemas.analysis import (
     PromptAnalysis,
@@ -57,6 +63,8 @@ def create_prompt(
         db,
         data,
     )
+
+
 @router.post(
     "/{prompt_id}/duplicate",
     response_model=PromptResponse,
@@ -74,6 +82,7 @@ def duplicate_prompt(
         prompt_id,
     )
 
+
 @router.get(
     "",
     response_model=list[PromptResponse],
@@ -88,19 +97,15 @@ def list_prompts(
 
 @router.get(
     "/{prompt_id}/versions",
-    response_model=list[
-        PromptVersionResponse
-    ],
+    response_model=list[PromptVersionResponse],
 )
 def list_prompt_versions(
     prompt_id: int,
     db: DatabaseSession,
 ) -> list[PromptVersionResponse]:
-    return (
-        prompt_version_service.list_versions(
-            db,
-            prompt_id,
-        )
+    return prompt_version_service.list_versions(
+        db,
+        prompt_id,
     )
 
 
@@ -113,12 +118,10 @@ def get_prompt_version(
     version: int,
     db: DatabaseSession,
 ) -> PromptVersionResponse:
-    return (
-        prompt_version_service.get_version(
-            db,
-            prompt_id,
-            version,
-        )
+    return prompt_version_service.get_version(
+        db,
+        prompt_id,
+        version,
     )
 
 
@@ -131,12 +134,10 @@ def restore_prompt_version(
     version: int,
     db: DatabaseSession,
 ) -> PromptResponse:
-    return (
-        prompt_version_service.restore_version(
-            db,
-            prompt_id,
-            version,
-        )
+    return prompt_version_service.restore_version(
+        db,
+        prompt_id,
+        version,
     )
 
 
@@ -152,12 +153,30 @@ def analyze_prompt(
     """
     Analyze a saved prompt using optional variable values.
     """
-    return (
-        prompt_analysis_service.analyze_prompt(
-            db=db,
-            prompt_id=prompt_id,
-            variables=data.variables,
-        )
+    return prompt_analysis_service.analyze_prompt(
+        db=db,
+        prompt_id=prompt_id,
+        variables=data.variables,
+    )
+
+
+@router.post(
+    "/{prompt_id}/run",
+    response_model=PromptRunResponse,
+)
+def run_prompt(
+    prompt_id: int,
+    data: PromptRunRequest,
+    db: DatabaseSession,
+) -> PromptRunResponse:
+    """
+    Render and execute a saved prompt using
+    a configured AI provider.
+    """
+    return prompt_run_service.run_prompt(
+        db=db,
+        prompt_id=prompt_id,
+        data=data,
     )
 
 

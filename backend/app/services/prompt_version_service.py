@@ -37,12 +37,10 @@ class PromptVersionService:
         prompt_id: int,
         version: int,
     ) -> PromptVersion:
-        prompt_version = (
-            prompt_version_repository.get_by_version(
-                db,
-                prompt_id,
-                version,
-            )
+        prompt_version = prompt_version_repository.get_by_version(
+            db,
+            prompt_id,
+            version,
         )
 
         if prompt_version is None:
@@ -59,11 +57,9 @@ class PromptVersionService:
         db: Session,
         prompt: Prompt,
     ) -> PromptVersion:
-        return (
-            prompt_version_repository.create_snapshot(
-                db,
-                prompt,
-            )
+        return prompt_version_repository.create_snapshot(
+            db,
+            prompt,
         )
 
     def list_versions(
@@ -76,11 +72,9 @@ class PromptVersionService:
             prompt_id,
         )
 
-        return (
-            prompt_version_repository.list_for_prompt(
-                db,
-                prompt_id,
-            )
+        return prompt_version_repository.list_for_prompt(
+            db,
+            prompt_id,
         )
 
     def get_version(
@@ -161,6 +155,4 @@ class PromptVersionService:
         )
 
 
-prompt_version_service = (
-    PromptVersionService()
-)
+prompt_version_service = PromptVersionService()

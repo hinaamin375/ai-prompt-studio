@@ -11,6 +11,7 @@ from app.api.routes import (
     comparisons_router,
     health_router,
     prompts_router,
+    providers_router,
     tags_router,
 )
 from app.core.config import settings
@@ -100,7 +101,10 @@ app.include_router(
     prompts_router,
     prefix=settings.api_v1_prefix,
 )
-
+app.include_router(
+    providers_router,
+    prefix=settings.api_v1_prefix,
+)
 app.include_router(
     comparisons_router,
     prefix=settings.api_v1_prefix,
@@ -115,6 +119,7 @@ app.include_router(
     tags_router,
     prefix=settings.api_v1_prefix,
 )
+
 
 @app.get(
     "/",

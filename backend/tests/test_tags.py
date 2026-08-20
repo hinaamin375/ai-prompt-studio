@@ -61,10 +61,7 @@ def test_list_tags() -> None:
 
     assert len(data) == 2
 
-    assert [
-        tag["name"]
-        for tag in data
-    ] == [
+    assert [tag["name"] for tag in data] == [
         "analysis",
         "writing",
     ]
@@ -97,10 +94,7 @@ def test_get_missing_tag_returns_404() -> None:
 
     data = response.json()
 
-    assert (
-        data["error"]["code"]
-        == "tag_not_found"
-    )
+    assert data["error"]["code"] == "tag_not_found"
 
 
 def test_update_tag() -> None:
@@ -121,10 +115,7 @@ def test_update_tag() -> None:
     )
 
     assert response.status_code == 200
-    assert (
-        response.json()["name"]
-        == "new-name"
-    )
+    assert response.json()["name"] == "new-name"
 
 
 def test_delete_tag() -> None:
@@ -171,10 +162,7 @@ def test_duplicate_tag_name_returns_409() -> None:
 
     data = second_response.json()
 
-    assert (
-        data["error"]["code"]
-        == "tag_name_exists"
-    )
+    assert data["error"]["code"] == "tag_name_exists"
 
 
 def test_update_tag_to_existing_name_returns_409() -> None:
@@ -195,9 +183,7 @@ def test_update_tag_to_existing_name_returns_409() -> None:
     assert first_response.status_code == 201
     assert second_response.status_code == 201
 
-    second_tag_id = (
-        second_response.json()["id"]
-    )
+    second_tag_id = second_response.json()["id"]
 
     response = client.patch(
         f"/api/v1/tags/{second_tag_id}",
