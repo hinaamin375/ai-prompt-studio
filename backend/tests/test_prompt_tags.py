@@ -323,3 +323,33 @@ def test_deleting_tag_removes_prompt_relationship() -> None:
 
     assert prompt_response.status_code == 200
     assert prompt_response.json()["tags"] == []
+
+
+def test_duplicate_prompt_preserves_tags() -> None:
+    writing = create_tag("writing")
+    research = create_tag("research")
+
+    original = create_prompt(
+        tag_ids=[
+            writing["id"],
+            research["id"],
+        ],
+    )
+
+    response = client.post(
+        f"/api/v1/prompts/{original['id']}/duplicate",
+    )
+
+    assert response.status_code == 201
+
+    duplicate = response.json()
+
+    assert duplicate["id"] != original["id"]
+
+    assert {
+        tag["name"]
+        for tag in duplicate["tags"]
+    } == {
+        "writing",
+        "research",
+    }

@@ -1,10 +1,24 @@
-import { Link } from "react-router-dom";
+import {
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  duplicatePrompt,
+} from "../../../api/prompts";
 
 import type {
   Prompt,
 } from "../../../types/prompt";
 
-import { FavoriteButton } from "./FavoriteButton";
+import {
+  FavoriteButton,
+} from "./FavoriteButton";
 
 
 interface PromptCardProps {
@@ -40,6 +54,42 @@ export function PromptCard({
   selected = false,
   onToggleSelection,
 }: PromptCardProps) {
+  const navigate = useNavigate();
+
+  const queryClient =
+    useQueryClient();
+
+
+  const duplicateMutation =
+    useMutation({
+      mutationFn: () =>
+        duplicatePrompt(prompt.id),
+
+      onSuccess: async (
+        duplicatedPrompt,
+      ) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["prompts"],
+        });
+
+        navigate(
+          `/prompts/${duplicatedPrompt.id}/edit`,
+        );
+      },
+
+      onError: () => {
+        window.alert(
+          "Unable to duplicate this prompt. Please try again.",
+        );
+      },
+    });
+
+
+  function handleDuplicate(): void {
+    duplicateMutation.mutate();
+  }
+
+
   return (
     <article
       className={
@@ -53,7 +103,9 @@ export function PromptCard({
           <div className="prompt-selection">
             <input
               type="checkbox"
-              aria-label={`Select ${prompt.title}`}
+              aria-label={
+                `Select ${prompt.title}`
+              }
               checked={selected}
               onChange={() =>
                 onToggleSelection(
@@ -85,31 +137,36 @@ export function PromptCard({
         </div>
 
 
-       {collectionName && (
-  <div className="prompt-card-collection">
-    <span aria-hidden="true">
-      📁
-    </span>
+        {collectionName && (
+          <div className="prompt-card-collection">
+            <span aria-hidden="true">
+              📁
+            </span>
 
-    <span>{collectionName}</span>
-  </div>
-)}
+            <span>
+              {collectionName}
+            </span>
+          </div>
+        )}
 
-{prompt.tags.length > 0 && (
-  <div
-    className="prompt-card-tags"
-    aria-label="Prompt tags"
-  >
-    {prompt.tags.map((tag) => (
-      <span
-        key={tag.id}
-        className="prompt-card-tag"
-      >
-        {tag.name}
-      </span>
-    ))}
-  </div>
-)}
+
+        {prompt.tags.length > 0 && (
+          <div
+            className="prompt-card-tags"
+            aria-label="Prompt tags"
+          >
+            {prompt.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="prompt-card-tag"
+              >
+                {tag.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+
         <p>
           {prompt.description?.trim() ||
             "No description provided."}
@@ -130,11 +187,28 @@ export function PromptCard({
           )}
         </span>
 
-        <Link
-          to={`/prompts/${prompt.id}/edit`}
-        >
-          Open prompt
-        </Link>
+        <div className="prompt-card-footer-actions">
+          <button
+            type="button"
+            className="prompt-card-duplicate"
+            disabled={
+              duplicateMutation.isPending
+            }
+            onClick={
+              handleDuplicate
+            }
+          >
+            {duplicateMutation.isPending
+              ? "Duplicating..."
+              : "Duplicate"}
+          </button>
+
+          <Link
+            to={`/prompts/${prompt.id}/edit`}
+          >
+            Open prompt
+          </Link>
+        </div>
       </footer>
     </article>
   );

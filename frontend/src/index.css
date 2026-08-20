@@ -3259,3 +3259,36 @@ box-shadow:
     width: 100%;
   }
 }
+/* =====================================================
+   Prompt duplication
+   ===================================================== */
+
+.prompt-card-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.prompt-card-duplicate {
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: #4f46e5;
+
+  font: inherit;
+  font-size: inherit;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.prompt-card-duplicate:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.prompt-card-duplicate:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}

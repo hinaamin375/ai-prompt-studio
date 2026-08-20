@@ -57,7 +57,22 @@ def create_prompt(
         db,
         data,
     )
-
+@router.post(
+    "/{prompt_id}/duplicate",
+    response_model=PromptResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def duplicate_prompt(
+    prompt_id: int,
+    db: DatabaseSession,
+) -> PromptResponse:
+    """
+    Create an independent copy of a saved prompt.
+    """
+    return prompt_service.duplicate_prompt(
+        db,
+        prompt_id,
+    )
 
 @router.get(
     "",

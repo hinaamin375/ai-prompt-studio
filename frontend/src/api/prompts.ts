@@ -33,6 +33,15 @@ export async function createPrompt(
 
   return response.data;
 }
+export async function duplicatePrompt(
+  promptId: number,
+): Promise<Prompt> {
+  const response = await apiClient.post<Prompt>(
+    `/prompts/${promptId}/duplicate`,
+  );
+
+  return response.data;
+}
 
 export async function updatePrompt(
   promptId: number,

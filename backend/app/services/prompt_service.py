@@ -157,6 +157,58 @@ class PromptService:
             prompt,
         )
 
+    def duplicate_prompt(
+        self,
+        db: Session,
+        prompt_id: int,
+    ) -> Prompt:
+        """
+        Create an independent copy of an existing prompt.
+
+        The duplicate keeps the prompt content, collection,
+        and tags, but starts unfavorited with its own
+        version history.
+        """
+        source_prompt = self.get_prompt(
+            db,
+            prompt_id,
+        )
+
+        copy_suffix = " (Copy)"
+        max_base_length = (
+            200 - len(copy_suffix)
+        )
+
+        duplicate = Prompt(
+            title=(
+                source_prompt.title[
+                    :max_base_length
+                ]
+                + copy_suffix
+            ),
+            description=(
+                source_prompt.description
+            ),
+            system_prompt=(
+                source_prompt.system_prompt
+            ),
+            user_prompt=(
+                source_prompt.user_prompt
+            ),
+            favorite=False,
+            collection_id=(
+                source_prompt.collection_id
+            ),
+            tags=list(
+                source_prompt.tags,
+            ),
+        )
+
+        return prompt_repository.create(
+            db,
+            duplicate,
+        )
+    
     def list_prompts(
         self,
         db: Session,
