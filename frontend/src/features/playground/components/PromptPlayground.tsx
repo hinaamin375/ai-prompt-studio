@@ -5,16 +5,42 @@ import {
 } from "react";
 
 import {
-  usePromptAnalysis,
-} from "../../analysis";
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
+
+import {
+  toast,
+} from "sonner";
+
+import type {
+  Prompt,
+} from "../../../types/prompt";
 
 import {
   extractVariables,
 } from "../../analysis/utils/extractVariables";
 
+import {
+  listProviders,
+} from "../api/providers";
+
+import {
+  runPrompt,
+} from "../api/promptRuns";
+
 import type {
-  Prompt,
-} from "../../../types/prompt";
+  PromptRunRequest,
+  PromptRunResponse,
+} from "../types/playground";
+
+import {
+  ProviderSelector,
+} from "./ProviderSelector";
+
+import {
+  RunResult,
+} from "./RunResult";
 
 
 interface PromptPlaygroundProps {
@@ -22,319 +48,424 @@ interface PromptPlaygroundProps {
 }
 
 
+function formatVariableLabel(
+  variableName: string,
+): string {
+  return variableName
+    .replaceAll("_", " ")
+    .replace(
+      /\b\w/g,
+      (character) =>
+        character.toUpperCase(),
+    );
+}
+
+
 export function PromptPlayground({
   prompt,
 }: PromptPlaygroundProps) {
-  const variableNames = useMemo(
-    () =>
-      extractVariables(
-        [
-          prompt.system_prompt ?? "",
-          prompt.user_prompt,
-        ].join("\n"),
-      ),
-    [
-      prompt.system_prompt,
+  const variableNames = useMemo(() => {
+    const combinedPrompt = [
+      prompt.system_prompt ?? "",
       prompt.user_prompt,
-    ],
+    ].join("\n");
+
+    return extractVariables(
+      combinedPrompt,
+    );
+  }, [
+    prompt.system_prompt,
+    prompt.user_prompt,
+  ]);
+
+
+  const [
+    variableValues,
+    setVariableValues,
+  ] = useState<Record<string, string>>(
+    {},
   );
 
-  const [values, setValues] = useState<
-    Record<string, string>
-  >({});
+  const [
+    providerId,
+    setProviderId,
+  ] = useState("");
 
-  const analysisMutation =
-    usePromptAnalysis();
+  const [
+    model,
+    setModel,
+  ] = useState("");
+
+
+  const providersQuery = useQuery({
+    queryKey: ["providers"],
+    queryFn: listProviders,
+  });
 
 
   useEffect(() => {
-    setValues((currentValues) => {
-      const nextValues:
-        Record<string, string> = {};
+    setVariableValues(
+      (currentValues) => {
+        const nextValues:
+          Record<string, string> = {};
 
-      for (const name of variableNames) {
-        nextValues[name] =
-          currentValues[name] ?? "";
-      }
+        for (
+          const variableName
+          of variableNames
+        ) {
+          nextValues[variableName] =
+            currentValues[
+              variableName
+            ] ?? "";
+        }
 
-      return nextValues;
-    });
+        return nextValues;
+      },
+    );
   }, [variableNames]);
 
 
   useEffect(() => {
-    const timeout = window.setTimeout(
-      () => {
-        analysisMutation.mutate({
-          promptId: prompt.id,
-          data: {
-            variables: values,
-          },
-        });
-      },
-      300,
+    const providers =
+      providersQuery.data;
+
+    if (
+      !providers ||
+      providers.length === 0
+    ) {
+      return;
+    }
+
+    const currentProvider =
+      providers.find(
+        (provider) =>
+          provider.id === providerId,
+      );
+
+    if (currentProvider) {
+      return;
+    }
+
+    const firstProvider =
+      providers[0];
+
+    setProviderId(
+      firstProvider.id,
     );
 
-    return () => {
-      window.clearTimeout(timeout);
-    };
+    setModel(
+      firstProvider.default_model,
+    );
   }, [
-    prompt.id,
-    values,
+    providersQuery.data,
+    providerId,
   ]);
+
+
+  const runMutation = useMutation<
+    PromptRunResponse,
+    Error,
+    PromptRunRequest
+  >({
+    mutationFn: (request) =>
+      runPrompt(
+        prompt.id,
+        request,
+      ),
+
+    onSuccess: () => {
+      toast.success(
+        "Prompt completed successfully",
+      );
+    },
+
+    onError: () => {
+      toast.error(
+        "Prompt execution failed",
+        {
+          description:
+            "Check the variables and provider, then try again.",
+        },
+      );
+    },
+  });
 
 
   function handleVariableChange(
     variableName: string,
     value: string,
   ): void {
-    setValues((currentValues) => ({
-      ...currentValues,
-      [variableName]: value,
-    }));
+    setVariableValues(
+      (currentValues) => ({
+        ...currentValues,
+        [variableName]: value,
+      }),
+    );
   }
 
 
-  const analysis =
-    analysisMutation.data;
+  function handleProviderChange(
+    nextProviderId: string,
+  ): void {
+    const provider =
+      providersQuery.data?.find(
+        (candidate) =>
+          candidate.id ===
+          nextProviderId,
+      );
 
-  const renderedMessages =
-    analysis?.rendered_document?.messages ?? [];
+    setProviderId(
+      nextProviderId,
+    );
+
+    setModel(
+      provider?.default_model ?? "",
+    );
+
+    runMutation.reset();
+  }
+
+
+  function handleModelChange(
+    nextModel: string,
+  ): void {
+    setModel(nextModel);
+
+    runMutation.reset();
+  }
+
+
+  function handleRun(): void {
+    if (!providerId || !model) {
+      toast.error(
+        "Select a provider and model.",
+      );
+
+      return;
+    }
+
+    const missingVariables =
+      variableNames.filter(
+        (variableName) =>
+          !variableValues[
+            variableName
+          ]?.trim(),
+      );
+
+    if (
+      missingVariables.length > 0
+    ) {
+      toast.error(
+        "Complete all prompt variables",
+        {
+          description:
+            missingVariables
+              .map(
+                (variableName) =>
+                  `{{${variableName}}}`,
+              )
+              .join(", "),
+        },
+      );
+
+      return;
+    }
+
+    runMutation.mutate({
+      provider: providerId,
+      model,
+      variables:
+        variableValues,
+    });
+  }
+
+
+  if (providersQuery.isPending) {
+    return (
+      <section className="playground-panel">
+        <div className="analysis-empty-state">
+          Loading AI providers...
+        </div>
+      </section>
+    );
+  }
+
+
+  if (providersQuery.isError) {
+    return (
+      <section className="playground-panel">
+        <div className="analysis-message-group error">
+          Unable to load AI providers.
+        </div>
+      </section>
+    );
+  }
+
+
+  const providers =
+    providersQuery.data ?? [];
 
 
   return (
-    <div className="playground">
-      <div className="playground-grid">
-        <section className="playground-panel">
-          <div className="playground-panel-header">
-            <div>
-              <p className="eyebrow">
-                Inputs
-              </p>
+    <section className="playground-panel">
+      <header className="playground-header">
+        <div>
+          <p className="eyebrow">
+            AI Execution
+          </p>
 
-              <h2>Variables</h2>
+          <h2>Prompt Playground</h2>
 
-              <p>
-                Supply values for the template
-                variables in this prompt.
-              </p>
-            </div>
+          <p>
+            Run this saved prompt against a
+            configured AI provider.
+          </p>
+        </div>
+      </header>
 
-            <span className="playground-count">
-              {variableNames.length}
-            </span>
+
+      <div className="playground-card">
+        <div className="playground-section-heading">
+          <div>
+            <h3>Model</h3>
+
+            <p>
+              Choose which provider should
+              execute this prompt.
+            </p>
           </div>
+        </div>
 
-
-          <div className="playground-panel-body">
-            {variableNames.length === 0 ? (
-              <div className="playground-empty">
-                This prompt has no template
-                variables.
-              </div>
-            ) : (
-              <div className="playground-fields">
-                {variableNames.map(
-                  (variableName) => (
-                    <div
-                      key={variableName}
-                      className="playground-field"
-                    >
-                      <label
-                        htmlFor={
-                          `playground-${variableName}`
-                        }
-                      >
-                        {variableName
-                          .replaceAll("_", " ")
-                          .replace(
-                            /\b\w/g,
-                            (character) =>
-                              character.toUpperCase(),
-                          )}
-                      </label>
-
-                      <textarea
-                        id={
-                          `playground-${variableName}`
-                        }
-                        value={
-                          values[
-                            variableName
-                          ] ?? ""
-                        }
-                        rows={4}
-                        placeholder={
-                          `Enter ${variableName}`
-                        }
-                        onChange={(event) =>
-                          handleVariableChange(
-                            variableName,
-                            event.target.value,
-                          )
-                        }
-                      />
-
-                      <code>
-                        {`{{${variableName}}}`}
-                      </code>
-                    </div>
-                  ),
-                )}
-              </div>
-            )}
+        {providers.length === 0 ? (
+          <div className="analysis-empty-state">
+            No AI providers are configured.
           </div>
-        </section>
-
-
-        <section className="playground-panel">
-          <div className="playground-panel-header">
-            <div>
-              <p className="eyebrow">
-                Preview
-              </p>
-
-              <h2>Rendered Prompt</h2>
-
-              <p>
-                Updates automatically as variable
-                values change.
-              </p>
-            </div>
-
-            {analysisMutation.isPending && (
-              <span className="playground-status">
-                Rendering...
-              </span>
-            )}
-          </div>
-
-
-          <div className="playground-panel-body">
-            {analysisMutation.isError && (
-              <div className="playground-error">
-                Could not render this prompt.
-              </div>
-            )}
-
-
-            {!analysis &&
-              analysisMutation.isPending && (
-                <div className="playground-empty">
-                  Preparing preview...
-                </div>
-              )}
-
-
-            {analysis && (
-              <>
-                <div className="playground-rendered">
-                  {renderedMessages.map(
-                    (message, index) => (
-                      <div
-                        key={index}
-                        className="playground-message"
-                      >
-                        <div className="playground-role">
-                          {message.role}
-                        </div>
-
-                        <pre>
-                          {message.content}
-                        </pre>
-                      </div>
-                    ),
-                  )}
-                </div>
-
-
-                {analysis.missing_variables.length >
-                  0 && (
-                  <div className="playground-missing">
-                    <strong>
-                      Missing variables
-                    </strong>
-
-                    <div className="playground-chips">
-                      {analysis.missing_variables.map(
-                        (name) => (
-                          <code key={name}>
-                            {`{{${name}}}`}
-                          </code>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </section>
+        ) : (
+          <ProviderSelector
+            providers={providers}
+            providerId={providerId}
+            model={model}
+            disabled={
+              runMutation.isPending
+            }
+            onProviderChange={
+              handleProviderChange
+            }
+            onModelChange={
+              handleModelChange
+            }
+          />
+        )}
       </div>
 
 
-      {analysis && (
-        <section className="playground-summary">
-          <div className="playground-stat">
-            <strong>
-              {analysis.statistics.characters}
-            </strong>
-            <span>Characters</span>
+      <div className="playground-card">
+        <div className="playground-section-heading">
+          <div>
+            <h3>Variables</h3>
+
+            <p>
+              Supply values for the prompt
+              template before running it.
+            </p>
           </div>
 
-          <div className="playground-stat">
-            <strong>
-              {analysis.statistics.words}
-            </strong>
-            <span>Words</span>
+          <span className="analysis-count-badge">
+            {variableNames.length}
+          </span>
+        </div>
+
+
+        {variableNames.length === 0 ? (
+          <div className="analysis-empty-state">
+            No template variables detected.
+            This prompt can be run directly.
           </div>
+        ) : (
+          <div className="playground-variable-grid">
+            {variableNames.map(
+              (variableName) => {
+                const inputId =
+                  `playground-variable-${variableName}`;
 
-          <div className="playground-stat">
-            <strong>
-              {analysis.statistics.lines}
-            </strong>
-            <span>Lines</span>
-          </div>
+                return (
+                  <div
+                    key={variableName}
+                    className="playground-field"
+                  >
+                    <label
+                      htmlFor={inputId}
+                    >
+                      {formatVariableLabel(
+                        variableName,
+                      )}
+                    </label>
 
-          <div className="playground-stat">
-            <strong>
-              {analysis.statistics.estimated_tokens}
-            </strong>
-            <span>Est. tokens</span>
-          </div>
-        </section>
-      )}
+                    <input
+                      id={inputId}
+                      type="text"
+                      value={
+                        variableValues[
+                          variableName
+                        ] ?? ""
+                      }
+                      disabled={
+                        runMutation.isPending
+                      }
+                      placeholder={
+                        `Enter ${variableName}`
+                      }
+                      onChange={(event) =>
+                        handleVariableChange(
+                          variableName,
+                          event.target.value,
+                        )
+                      }
+                    />
 
-
-      {analysis &&
-        (
-          analysis.warnings.length > 0 ||
-          analysis.errors.length > 0
-        ) && (
-          <section className="playground-alerts">
-            {analysis.errors.map(
-              (error) => (
-                <div
-                  key={error}
-                  className="playground-alert error"
-                >
-                  {error}
-                </div>
-              ),
+                    <code>
+                      {`{{${variableName}}}`}
+                    </code>
+                  </div>
+                );
+              },
             )}
-
-            {analysis.warnings.map(
-              (warning) => (
-                <div
-                  key={warning}
-                  className="playground-alert warning"
-                >
-                  {warning}
-                </div>
-              ),
-            )}
-          </section>
+          </div>
         )}
-    </div>
+
+
+        <div className="playground-actions">
+          <button
+            type="button"
+            className="primary-button"
+            disabled={
+              runMutation.isPending ||
+              providers.length === 0 ||
+              !providerId ||
+              !model
+            }
+            onClick={handleRun}
+          >
+            {runMutation.isPending ? (
+              <>
+                <span
+                  className="button-spinner"
+                  aria-hidden="true"
+                />
+
+                Running...
+              </>
+            ) : (
+              "▶ Run Prompt"
+            )}
+          </button>
+        </div>
+      </div>
+
+
+      <RunResult
+        result={runMutation.data}
+      />
+    </section>
   );
 }

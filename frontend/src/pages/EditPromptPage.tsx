@@ -23,6 +23,9 @@ import type {
   PromptUpdate,
 } from "../types/prompt";
 import { toast } from "sonner";
+import {
+  PromptPlayground,
+} from "../features/playground";
 
 export function EditPromptPage() {
   const params = useParams();
@@ -196,6 +199,9 @@ export function EditPromptPage() {
   prompt={promptQuery.data}
 />
       </div>
+      <PromptPlayground
+  prompt={promptQuery.data}
+/>
     </section>
   );
 }
