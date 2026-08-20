@@ -188,6 +188,12 @@ export function PromptCard({
         </span>
 
         <div className="prompt-card-footer-actions">
+          <Link
+  to={`/prompts/${prompt.id}/playground`}
+  className="prompt-card-run"
+>
+  Run
+</Link>
           <button
             type="button"
             className="prompt-card-duplicate"

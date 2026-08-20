@@ -53,6 +53,10 @@ def test_analyzer_renders_prompt_and_collects_missing_variables() -> None:
     )
 
     assert [item.name for item in result.variables] == ["name", "company"]
+    assert [
+        item.message_index
+        for item in result.variables
+    ] == [0, 1]
     assert result.missing_variables == ["company"]
     assert result.warnings == []
     assert result.errors == []

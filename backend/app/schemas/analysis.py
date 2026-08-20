@@ -12,13 +12,9 @@ from pydantic import BaseModel, Field
 
 from app.domain.prompt import PromptDocument
 
-
 class PromptVariableOccurrence(BaseModel):
     """
     Represents one variable occurrence discovered inside a prompt.
-
-    The parser will use start and end positions later so that the frontend
-    can highlight variables inside the prompt editor.
     """
 
     name: str = Field(
@@ -26,6 +22,12 @@ class PromptVariableOccurrence(BaseModel):
         min_length=1,
         description="Name of the discovered prompt variable.",
         examples=["company"],
+    )
+
+    message_index: int = Field(
+        ...,
+        ge=0,
+        description="Zero-based index of the message containing the variable.",
     )
 
     start: int = Field(
@@ -39,7 +41,6 @@ class PromptVariableOccurrence(BaseModel):
         ge=0,
         description="Zero-based end position of the variable.",
     )
-
 
 class PromptStatistics(BaseModel):
     """

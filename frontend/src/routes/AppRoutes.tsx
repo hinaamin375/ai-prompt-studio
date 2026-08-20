@@ -2,7 +2,9 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-
+import {
+  PlaygroundPage,
+} from "../pages/PlaygroundPage";
 import {
   AppLayout,
 } from "../components/layout/AppLayout";
@@ -61,6 +63,10 @@ export function AppRoutes() {
         <Route
           path="/prompts/:promptId/edit"
           element={<EditPromptPage />}
+        />
+        <Route
+          path="/prompts/:promptId/playground"
+          element={<PlaygroundPage />}
         />
 
         <Route
