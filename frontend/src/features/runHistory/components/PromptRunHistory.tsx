@@ -13,6 +13,10 @@ import {
   listPromptRuns,
 } from "../api/runHistory";
 
+import {
+  RunHistoryComparison,
+} from "./RunHistoryComparison";
+
 
 interface PromptRunHistoryProps {
   promptId: number;
@@ -82,6 +86,11 @@ export function PromptRunHistory({
     setExpandedRunId,
   ] = useState<number | null>(null);
 
+  const [
+    selectedRunIds,
+    setSelectedRunIds,
+  ] = useState<number[]>([]);
+
 
   const runsQuery = useQuery({
     queryKey: [
@@ -107,6 +116,35 @@ export function PromptRunHistory({
           ? null
           : runId,
     );
+  }
+
+
+  function toggleRunSelection(
+    runId: number,
+  ): void {
+    setSelectedRunIds(
+      (current) => {
+        if (current.includes(runId)) {
+          return current.filter(
+            (id) => id !== runId,
+          );
+        }
+
+        if (current.length >= 2) {
+          return current;
+        }
+
+        return [
+          ...current,
+          runId,
+        ];
+      },
+    );
+  }
+
+
+  function clearComparison(): void {
+    setSelectedRunIds([]);
   }
 
 
@@ -169,6 +207,22 @@ export function PromptRunHistory({
   const runs =
     runsQuery.data ?? [];
 
+  const runA =
+    selectedRunIds.length === 2
+      ? runs.find(
+          (run) =>
+            run.id === selectedRunIds[0],
+        )
+      : undefined;
+
+  const runB =
+    selectedRunIds.length === 2
+      ? runs.find(
+          (run) =>
+            run.id === selectedRunIds[1],
+        )
+      : undefined;
+
 
   return (
     <section className="prompt-run-history">
@@ -228,202 +282,259 @@ export function PromptRunHistory({
           </p>
         </div>
       ) : (
-        <div className="prompt-run-list">
-          {runs.map((run) => {
-            const expanded =
-              expandedRunId === run.id;
+        <>
+          <div className="prompt-run-compare-toolbar">
+            <span>
+              {selectedRunIds.length} of 2
+              selected
+            </span>
 
-            return (
-              <article
-                key={run.id}
-                className="prompt-run-item"
+            {selectedRunIds.length > 0 && (
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={clearComparison}
               >
-                <div className="prompt-run-main">
-                  <div className="prompt-run-provider">
-                    <strong>
-                      {formatProvider(
-                        run.provider,
-                      )}
-                    </strong>
+                Clear
+              </button>
+            )}
+          </div>
 
-                    <span>
-                      {run.model}
-                    </span>
+
+          <div className="prompt-run-list">
+            {runs.map((run) => {
+              const expanded =
+                expandedRunId === run.id;
+
+              const selected =
+                selectedRunIds.includes(
+                  run.id,
+                );
+
+              return (
+                <article
+                  key={run.id}
+                  className="prompt-run-item"
+                >
+                  <div className="prompt-run-selection">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        disabled={
+                          !selected &&
+                          selectedRunIds.length >= 2
+                        }
+                        onChange={() =>
+                          toggleRunSelection(
+                            run.id,
+                          )
+                        }
+                      />
+
+                      <span>
+                        Select for comparison
+                      </span>
+                    </label>
                   </div>
 
 
-                  <div className="prompt-run-stat">
-                    <span>
-                      Total tokens
-                    </span>
+                  <div className="prompt-run-main">
+                    <div className="prompt-run-provider">
+                      <strong>
+                        {formatProvider(
+                          run.provider,
+                        )}
+                      </strong>
 
-                    <strong>
-                      {formatTokens(
-                        run.total_tokens,
-                      )}
-                    </strong>
-                  </div>
-
-
-                  <div className="prompt-run-stat">
-                    <span>
-                      Runtime
-                    </span>
-
-                    <strong>
-                      {formatDuration(
-                        run.duration_ms,
-                      )}
-                    </strong>
-                  </div>
-
-
-                  <div className="prompt-run-date">
-                    {formatDate(
-                      run.created_at,
-                    )}
-                  </div>
-
-
-                  <button
-                    type="button"
-                    className="secondary-button"
-                    onClick={() =>
-                      toggleRun(run.id)
-                    }
-                  >
-                    {expanded
-                      ? "Hide Result"
-                      : "View Result"}
-                  </button>
-                </div>
-
-
-                {expanded && (
-                  <div className="prompt-run-details">
-                    <div className="prompt-run-token-grid">
-                      <div>
-                        <span>
-                          Input
-                        </span>
-
-                        <strong>
-                          {formatTokens(
-                            run.input_tokens,
-                          )}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <span>
-                          Output
-                        </span>
-
-                        <strong>
-                          {formatTokens(
-                            run.output_tokens,
-                          )}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <span>
-                          Total
-                        </span>
-
-                        <strong>
-                          {formatTokens(
-                            run.total_tokens,
-                          )}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <span>
-                          Runtime
-                        </span>
-
-                        <strong>
-                          {formatDuration(
-                            run.duration_ms,
-                          )}
-                        </strong>
-                      </div>
+                      <span>
+                        {run.model}
+                      </span>
                     </div>
 
 
-                    {Object.keys(
-                      run.variables,
-                    ).length > 0 && (
-                      <div className="prompt-run-variables">
-                        <h4>
-                          Variables
-                        </h4>
+                    <div className="prompt-run-stat">
+                      <span>
+                        Total tokens
+                      </span>
 
-                        <div className="prompt-run-variable-list">
-                          {Object.entries(
-                            run.variables,
-                          ).map(
-                            ([
-                              name,
-                              value,
-                            ]) => (
-                              <div
-                                key={name}
-                                className="prompt-run-variable"
-                              >
-                                <strong>
-                                  {name}
-                                </strong>
+                      <strong>
+                        {formatTokens(
+                          run.total_tokens,
+                        )}
+                      </strong>
+                    </div>
 
-                                <span>
-                                  {String(
-                                    value,
-                                  )}
-                                </span>
-                              </div>
-                            ),
-                          )}
+
+                    <div className="prompt-run-stat">
+                      <span>
+                        Runtime
+                      </span>
+
+                      <strong>
+                        {formatDuration(
+                          run.duration_ms,
+                        )}
+                      </strong>
+                    </div>
+
+
+                    <div className="prompt-run-date">
+                      {formatDate(
+                        run.created_at,
+                      )}
+                    </div>
+
+
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() =>
+                        toggleRun(run.id)
+                      }
+                    >
+                      {expanded
+                        ? "Hide Result"
+                        : "View Result"}
+                    </button>
+                  </div>
+
+
+                  {expanded && (
+                    <div className="prompt-run-details">
+                      <div className="prompt-run-token-grid">
+                        <div>
+                          <span>
+                            Input
+                          </span>
+
+                          <strong>
+                            {formatTokens(
+                              run.input_tokens,
+                            )}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>
+                            Output
+                          </span>
+
+                          <strong>
+                            {formatTokens(
+                              run.output_tokens,
+                            )}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>
+                            Total
+                          </span>
+
+                          <strong>
+                            {formatTokens(
+                              run.total_tokens,
+                            )}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>
+                            Runtime
+                          </span>
+
+                          <strong>
+                            {formatDuration(
+                              run.duration_ms,
+                            )}
+                          </strong>
                         </div>
                       </div>
-                    )}
 
 
-                    <div className="prompt-run-response">
-                      <div className="prompt-run-response-heading">
-                        <h4>
-                          AI Response
-                        </h4>
+                      {Object.keys(
+                        run.variables,
+                      ).length > 0 && (
+                        <div className="prompt-run-variables">
+                          <h4>
+                            Variables
+                          </h4>
 
-                        <button
-                          type="button"
-                          className="secondary-button"
-                          onClick={() => {
-                            void navigator.clipboard.writeText(
-                              run.output_text,
-                            );
-                          }}
-                        >
-                          Copy
-                        </button>
-                      </div>
+                          <div className="prompt-run-variable-list">
+                            {Object.entries(
+                              run.variables,
+                            ).map(
+                              ([
+                                name,
+                                value,
+                              ]) => (
+                                <div
+                                  key={name}
+                                  className="prompt-run-variable"
+                                >
+                                  <strong>
+                                    {name}
+                                  </strong>
 
-                      <div className="prompt-run-response-content">
-                        <ReactMarkdown
-                          remarkPlugins={[
-                            remarkGfm,
-                          ]}
-                        >
-                          {run.output_text}
-                        </ReactMarkdown>
+                                  <span>
+                                    {String(
+                                      value,
+                                    )}
+                                  </span>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+
+                      <div className="prompt-run-response">
+                        <div className="prompt-run-response-heading">
+                          <h4>
+                            AI Response
+                          </h4>
+
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => {
+                              void navigator.clipboard.writeText(
+                                run.output_text,
+                              );
+                            }}
+                          >
+                            Copy
+                          </button>
+                        </div>
+
+                        <div className="prompt-run-response-content">
+                          <ReactMarkdown
+                            remarkPlugins={[
+                              remarkGfm,
+                            ]}
+                          >
+                            {run.output_text}
+                          </ReactMarkdown>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </article>
-            );
-          })}
-        </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+
+
+          {runA && runB && (
+            <RunHistoryComparison
+              runA={runA}
+              runB={runB}
+              onClose={clearComparison}
+            />
+          )}
+        </>
       )}
     </section>
   );

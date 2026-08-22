@@ -10,3 +10,7 @@ export {
 export type {
   PromptRunHistory as PromptRunHistoryType,
 } from "./types/runHistory";
+
+export {
+  RunHistoryComparison,
+} from "./components/RunHistoryComparison";
