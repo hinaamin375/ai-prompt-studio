@@ -3820,3 +3820,99 @@ box-shadow:
     width: 100%;
   }
 }
+/* =====================================================
+   Model Comparison
+   ===================================================== */
+
+.model-comparison-panel {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e9f1;
+}
+
+.model-comparison-header {
+  margin-bottom: 1.5rem;
+}
+
+.model-comparison-controls {
+  background: #ffffff;
+  border: 1px solid #dfe4ee;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.model-comparison-provider-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.model-comparison-variables {
+  margin-top: 1.5rem;
+}
+
+.model-comparison-variables h3 {
+  margin-bottom: 1rem;
+}
+
+.model-comparison-results {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.model-comparison-result {
+  background: #ffffff;
+  border: 1px solid #dfe4ee;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.model-comparison-result h3 {
+  margin-top: 0.25rem;
+}
+
+.model-comparison-output {
+  min-height: 180px;
+  margin-top: 1rem;
+  padding: 1rem;
+
+  background: #f8fafc;
+  border: 1px solid #e5e9f1;
+  border-radius: 9px;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.model-comparison-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  margin-top: 1rem;
+}
+
+.model-comparison-meta span {
+  padding: 0.3rem 0.6rem;
+
+  background: #f7f8fc;
+  border: 1px solid #dfe4ee;
+  border-radius: 999px;
+
+  color: #60708d;
+  font-size: 0.78rem;
+}
+
+
+@media (max-width: 800px) {
+  .model-comparison-provider-grid,
+  .model-comparison-results {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,5 +1,7 @@
 import { usePrompts } from "../features/prompts/hooks/usePrompts";
-
+import {
+  ModelComparisonPanel,
+} from "../features/modelComparison";
 import { PromptComparisonPanel } from "../features/comparisons/components/PromptComparisonPanel";
 
 export default function ComparisonsPage() {
@@ -23,6 +25,9 @@ export default function ComparisonsPage() {
       <PromptComparisonPanel
         prompts={prompts}
       />
+      <ModelComparisonPanel
+  prompts={prompts}
+/>
     </>
   );
 }
