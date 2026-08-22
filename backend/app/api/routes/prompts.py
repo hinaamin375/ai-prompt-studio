@@ -36,7 +36,12 @@ from app.services.prompt_service import (
 from app.services.prompt_version_service import (
     prompt_version_service,
 )
-
+from app.schemas.prompt_run_history import (
+    PromptRunHistoryResponse,
+)
+from app.services.prompt_run_history_service import (
+    prompt_run_history_service,
+)
 
 router = APIRouter(
     prefix="/prompts",
@@ -62,6 +67,36 @@ def create_prompt(
     return prompt_service.create_prompt(
         db,
         data,
+    )
+
+
+@router.get(
+    "/{prompt_id}/runs",
+    response_model=list[PromptRunHistoryResponse],
+)
+def list_prompt_runs(
+    prompt_id: int,
+    db: DatabaseSession,
+) -> list[PromptRunHistoryResponse]:
+    return prompt_run_history_service.list_runs(
+        db,
+        prompt_id,
+    )
+
+
+@router.get(
+    "/{prompt_id}/runs/{run_id}",
+    response_model=PromptRunHistoryResponse,
+)
+def get_prompt_run(
+    prompt_id: int,
+    run_id: int,
+    db: DatabaseSession,
+) -> PromptRunHistoryResponse:
+    return prompt_run_history_service.get_run(
+        db,
+        prompt_id,
+        run_id,
     )
 
 

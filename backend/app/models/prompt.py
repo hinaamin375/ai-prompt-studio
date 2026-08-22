@@ -22,6 +22,7 @@ from app.models.tag import prompt_tags
 
 if TYPE_CHECKING:
     from app.models.collection import Collection
+    from app.models.prompt_run import PromptRun
     from app.models.prompt_version import PromptVersion
     from app.models.tag import Tag
 
@@ -89,6 +90,11 @@ class Prompt(Base):
     )
 
     versions: Mapped[list["PromptVersion"]] = relationship(
+        back_populates="prompt",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    runs: Mapped[list["PromptRun"]] = relationship(
         back_populates="prompt",
         cascade="all, delete-orphan",
         passive_deletes=True,

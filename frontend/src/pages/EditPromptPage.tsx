@@ -26,6 +26,9 @@ import { toast } from "sonner";
 import {
   PromptPlayground,
 } from "../features/playground";
+import {
+  PromptRunHistory,
+} from "../features/runHistory";
 
 export function EditPromptPage() {
   const params = useParams();
@@ -201,6 +204,9 @@ export function EditPromptPage() {
       </div>
       <PromptPlayground
   prompt={promptQuery.data}
+/>
+<PromptRunHistory
+  promptId={promptId}
 />
     </section>
   );

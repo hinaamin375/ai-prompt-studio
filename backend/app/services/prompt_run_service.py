@@ -28,6 +28,10 @@ from app.schemas.prompt_run import (
 from app.services.prompt_service import (
     prompt_service,
 )
+from app.models.prompt_run import PromptRun
+from app.repositories.prompt_run_repository import (
+    prompt_run_repository,
+)
 
 
 class PromptRunService:
@@ -97,7 +101,22 @@ class PromptRunService:
             raise PromptRunError() from exc
 
         duration_ms = round((perf_counter() - started_at) * 1000)
+        prompt_run = PromptRun(
+            prompt_id=prompt_id,
+            provider=result.provider,
+            model=result.model,
+            variables=dict(data.variables),
+            output_text=result.output_text,
+            duration_ms=duration_ms,
+            input_tokens=result.usage.input_tokens,
+            output_tokens=result.usage.output_tokens,
+            total_tokens=result.usage.total_tokens,
+        )
 
+        prompt_run_repository.create(
+            db,
+            prompt_run,
+        )
         return PromptRunResponse(
             provider=result.provider,
             model=result.model,

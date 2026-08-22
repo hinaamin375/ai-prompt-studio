@@ -7,6 +7,7 @@ import {
 import {
   useMutation,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 
 import {
@@ -77,7 +78,7 @@ export function PromptPlayground({
     prompt.system_prompt,
     prompt.user_prompt,
   ]);
-
+  const queryClient = useQueryClient();
 
   const [
     variableValues,
@@ -173,10 +174,16 @@ export function PromptPlayground({
         request,
       ),
 
-    onSuccess: () => {
+    onSuccess:async() => {
       toast.success(
         "Prompt completed successfully",
       );
+      await queryClient.invalidateQueries({
+  queryKey: [
+    "prompt-runs",
+    prompt.id,
+  ],
+});
     },
 
     onError: () => {
