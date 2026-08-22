@@ -36,7 +36,9 @@ import type {
 import {
   ModelComparisonResult as ModelComparisonResultCard,
 } from "./ModelComparisonResult";
-
+import {
+  ModelComparisonSummary,
+} from "./ModelComparisonSummary";
 
 interface ModelComparisonPanelProps {
   prompts: Prompt[];
@@ -362,7 +364,16 @@ export function ModelComparisonPanel({
         </div>
       </div>
 
-
+{comparisonMutation.data && (
+  <ModelComparisonSummary
+    left={
+      comparisonMutation.data.left
+    }
+    right={
+      comparisonMutation.data.right
+    }
+  />
+)}
       <div className="model-comparison-results">
         <ModelComparisonResultCard
           title={

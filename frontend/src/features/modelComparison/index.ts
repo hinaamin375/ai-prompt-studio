@@ -10,6 +10,10 @@ export {
   ModelComparisonResult,
 } from "./components/ModelComparisonResult";
 
+export {
+  ModelComparisonSummary,
+} from "./components/ModelComparisonSummary";
+
 export type {
   ModelComparisonRequest,
   ModelComparisonResult as ModelComparisonResultType,
