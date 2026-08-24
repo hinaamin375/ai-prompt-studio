@@ -5023,3 +5023,9 @@ box-shadow:
     grid-template-columns: 1fr;
   }
 }
+.test-case-edit-form {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+
+  border-top: 1px solid #e4e8ef;
+}

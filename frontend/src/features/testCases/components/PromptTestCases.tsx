@@ -30,6 +30,7 @@ import {
   deletePromptTestCase,
   listPromptTestCases,
   runPromptTestCase,
+  updatePromptTestCase,
 } from "../api/testCases";
 
 import type {
@@ -68,7 +69,10 @@ export function PromptTestCases({
     showCreateForm,
     setShowCreateForm,
   ] = useState(false);
-
+  const [
+  editingTestCaseId,
+  setEditingTestCaseId,
+] = useState<number | null>(null);
   const [
     providerId,
     setProviderId,
@@ -209,7 +213,58 @@ const [
       );
     },
   });
+const updateMutation = useMutation({
+  mutationFn: ({
+    testCaseId,
+    data,
+  }: {
+    testCaseId: number;
+    data: PromptTestCaseCreate;
+  }) =>
+    updatePromptTestCase(
+      prompt.id,
+      testCaseId,
+      data,
+    ),
 
+  onSuccess: async (
+    _,
+    variables,
+  ) => {
+    await queryClient.invalidateQueries({
+      queryKey: [
+        "prompt-test-cases",
+        prompt.id,
+      ],
+    });
+
+    setRunResults(
+      (current) => {
+        const next = {
+          ...current,
+        };
+
+        delete next[
+          variables.testCaseId
+        ];
+
+        return next;
+      },
+    );
+
+    setEditingTestCaseId(null);
+
+    toast.success(
+      "Test case updated",
+    );
+  },
+
+  onError: () => {
+    toast.error(
+      "Could not update test case",
+    );
+  },
+});
 
   const runMutation = useMutation<
     PromptTestCaseRunResponse,
@@ -471,12 +526,14 @@ const [
     type="button"
     className="primary-button"
     disabled={isRunningAll}
-    onClick={() =>
-      setShowCreateForm(
-        (current) =>
-          !current,
-      )
-    }
+    onClick={() => {
+  setEditingTestCaseId(null);
+
+  setShowCreateForm(
+    (current) =>
+      !current,
+  );
+}}
   >
     {showCreateForm
       ? "Close Form"
@@ -769,7 +826,24 @@ const [
                           ? "Running..."
                           : "▶ Run Test"}
                       </button>
+<button
+  type="button"
+  className="secondary-button"
+  disabled={
+    isRunning ||
+    isRunningAll ||
+    updateMutation.isPending
+  }
+  onClick={() => {
+    setShowCreateForm(false);
 
+    setEditingTestCaseId(
+      testCase.id,
+    );
+  }}
+>
+  Edit
+</button>
                       <button
                         type="button"
                         className="danger-button"
@@ -795,8 +869,52 @@ const [
                     </div>
                   </div>
 
+{editingTestCaseId ===
+  testCase.id && (
+  <div className="test-case-edit-form">
+    <TestCaseForm
+      variableNames={
+        variableNames
+      }
+      initialValues={{
+        name:
+          testCase.name,
 
-                  <div className="test-case-saved-data">
+        description:
+          testCase.description,
+
+        variables:
+          testCase.variables,
+
+        expected_contains:
+          testCase.expected_contains,
+      }}
+      submitLabel="Save Changes"
+      isSubmitting={
+        updateMutation.isPending
+      }
+      onCancel={() =>
+        setEditingTestCaseId(
+          null,
+        )
+      }
+      onSubmit={async (
+        values,
+      ) => {
+        await updateMutation.mutateAsync({
+          testCaseId:
+            testCase.id,
+
+          data:
+            values,
+        });
+      }}
+    />
+  </div>
+)}
+{editingTestCaseId !==
+  testCase.id && (
+  <div className="test-case-saved-data">
                     <div>
                       <h4>
                         Variables
@@ -860,13 +978,15 @@ const [
                       )}
                     </div>
                   </div>
+  )}
 
-
-                  {result && (
-                    <TestCaseRunResult
-                      result={result}
-                    />
-                  )}
+                  {result &&
+  editingTestCaseId !==
+    testCase.id && (
+    <TestCaseRunResult
+      result={result}
+    />
+)}
                 </article>
               );
             },
