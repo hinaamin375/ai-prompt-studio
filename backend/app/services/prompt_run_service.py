@@ -15,10 +15,15 @@ from app.engine import (
     PromptRenderer,
 )
 from app.mappers import PromptMapper
+from app.models.prompt_run import PromptRun
 from app.providers import (
+    ProviderExecutionSettings,
     ProviderMessage,
     ProviderRegistry,
     build_provider_registry,
+)
+from app.repositories.prompt_run_repository import (
+    prompt_run_repository,
 )
 from app.schemas.prompt_run import (
     PromptRunRequest,
@@ -27,10 +32,6 @@ from app.schemas.prompt_run import (
 )
 from app.services.prompt_service import (
     prompt_service,
-)
-from app.models.prompt_run import PromptRun
-from app.repositories.prompt_run_repository import (
-    prompt_run_repository,
 )
 
 
@@ -73,14 +74,21 @@ class PromptRunService:
             data.variables,
         )
 
-        remaining_variables = self._parser.parse(rendered_document)
+        remaining_variables = self._parser.parse(
+            rendered_document,
+        )
 
         missing_names = list(
-            dict.fromkeys(occurrence.name for occurrence in remaining_variables)
+            dict.fromkeys(
+                occurrence.name
+                for occurrence in remaining_variables
+            )
         )
 
         if missing_names:
-            raise PromptVariablesMissingError(missing_names)
+            raise PromptVariablesMissingError(
+                missing_names,
+            )
 
         messages = [
             ProviderMessage(
@@ -90,22 +98,33 @@ class PromptRunService:
             for message in rendered_document.messages
         ]
 
+        execution_settings = ProviderExecutionSettings(
+            temperature=data.temperature,
+            max_output_tokens=data.max_output_tokens,
+        )
+
         started_at = perf_counter()
 
         try:
             result = provider.run(
                 messages=messages,
                 model=data.model,
+                settings=execution_settings,
             )
         except Exception as exc:
             raise PromptRunError() from exc
 
-        duration_ms = round((perf_counter() - started_at) * 1000)
+        duration_ms = round(
+            (perf_counter() - started_at) * 1000
+        )
+
         prompt_run = PromptRun(
             prompt_id=prompt_id,
             provider=result.provider,
             model=result.model,
             variables=dict(data.variables),
+            temperature=data.temperature,
+            max_output_tokens=data.max_output_tokens,
             output_text=result.output_text,
             duration_ms=duration_ms,
             input_tokens=result.usage.input_tokens,
@@ -117,15 +136,16 @@ class PromptRunService:
             db,
             prompt_run,
         )
+
         return PromptRunResponse(
             provider=result.provider,
             model=result.model,
             output_text=result.output_text,
             duration_ms=duration_ms,
             usage=PromptRunUsage(
-                input_tokens=(result.usage.input_tokens),
-                output_tokens=(result.usage.output_tokens),
-                total_tokens=(result.usage.total_tokens),
+                input_tokens=result.usage.input_tokens,
+                output_tokens=result.usage.output_tokens,
+                total_tokens=result.usage.total_tokens,
             ),
         )
 

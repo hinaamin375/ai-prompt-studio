@@ -11,6 +11,12 @@ class ProviderMessage:
 
 
 @dataclass(frozen=True, slots=True)
+class ProviderExecutionSettings:
+    temperature: float | None = None
+    max_output_tokens: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class ProviderUsage:
     input_tokens: int | None = None
     output_tokens: int | None = None
@@ -40,5 +46,6 @@ class ModelProvider(ABC):
         *,
         messages: list[ProviderMessage],
         model: str | None = None,
+        settings: ProviderExecutionSettings | None = None,
     ) -> ProviderResult:
         raise NotImplementedError

@@ -20,6 +20,9 @@ class PromptRunHistoryResponse(BaseModel):
 
     variables: dict[str, Any]
 
+    temperature: float | None
+    max_output_tokens: int | None
+
     output_text: str
     duration_ms: int
 

@@ -4,6 +4,7 @@ import httpx
 
 from app.providers.base import (
     ModelProvider,
+    ProviderExecutionSettings,
     ProviderMessage,
     ProviderResult,
     ProviderUsage,
@@ -44,25 +45,41 @@ class QwenProvider(ModelProvider):
         *,
         messages: list[ProviderMessage],
         model: str | None = None,
+        settings: ProviderExecutionSettings | None = None,
     ) -> ProviderResult:
         model_name = model or self.default_model
+
+        payload: dict[str, object] = {
+            "model": model_name,
+            "messages": [
+                {
+                    "role": message.role,
+                    "content": message.content,
+                }
+                for message in messages
+            ],
+        }
+
+        if settings is not None:
+            if settings.temperature is not None:
+                payload["temperature"] = (
+                    settings.temperature
+                )
+
+            if settings.max_output_tokens is not None:
+                payload["max_tokens"] = (
+                    settings.max_output_tokens
+                )
 
         response = self._client.post(
             f"{self._base_url}/chat/completions",
             headers={
-                "Authorization": (f"Bearer {self._api_key}"),
+                "Authorization": (
+                    f"Bearer {self._api_key}"
+                ),
                 "Content-Type": "application/json",
             },
-            json={
-                "model": model_name,
-                "messages": [
-                    {
-                        "role": message.role,
-                        "content": message.content,
-                    }
-                    for message in messages
-                ],
-            },
+            json=payload,
         )
 
         response.raise_for_status()
@@ -72,12 +89,20 @@ class QwenProvider(ModelProvider):
         choices = data.get("choices", [])
 
         if not choices:
-            raise ValueError("Qwen returned no response choices.")
+            raise ValueError(
+                "Qwen returned no response choices."
+            )
 
-        output_text = choices[0].get("message", {}).get("content")
+        output_text = (
+            choices[0]
+            .get("message", {})
+            .get("content")
+        )
 
         if not isinstance(output_text, str):
-            raise ValueError("Qwen returned no text content.")
+            raise ValueError(
+                "Qwen returned no text content."
+            )
 
         usage = data.get("usage", {})
 
@@ -89,8 +114,14 @@ class QwenProvider(ModelProvider):
             ),
             output_text=output_text,
             usage=ProviderUsage(
-                input_tokens=usage.get("prompt_tokens"),
-                output_tokens=usage.get("completion_tokens"),
-                total_tokens=usage.get("total_tokens"),
+                input_tokens=usage.get(
+                    "prompt_tokens"
+                ),
+                output_tokens=usage.get(
+                    "completion_tokens"
+                ),
+                total_tokens=usage.get(
+                    "total_tokens"
+                ),
             ),
         )

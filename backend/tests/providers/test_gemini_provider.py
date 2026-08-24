@@ -4,6 +4,7 @@ import httpx
 
 from app.providers import (
     GeminiProvider,
+    ProviderExecutionSettings,
     ProviderMessage,
 )
 
@@ -34,6 +35,10 @@ def test_gemini_provider_normalizes_response():
                 ],
             }
         ]
+        assert payload["generationConfig"] == {
+             "temperature": 0.4,
+             "maxOutputTokens": 600,
+        }
 
         return httpx.Response(
             200,
@@ -68,17 +73,21 @@ def test_gemini_provider_normalizes_response():
     )
 
     result = provider.run(
-        messages=[
-            ProviderMessage(
-                role="system",
-                content="You are helpful.",
-            ),
-            ProviderMessage(
-                role="user",
-                content="Hello",
-            ),
-        ]
-    )
+    messages=[
+        ProviderMessage(
+            role="system",
+            content="You are helpful.",
+        ),
+        ProviderMessage(
+            role="user",
+            content="Hello",
+        ),
+    ],
+    settings=ProviderExecutionSettings(
+        temperature=0.4,
+        max_output_tokens=600,
+    ),
+)
 
     assert result.provider == "gemini"
 

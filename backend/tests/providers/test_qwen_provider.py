@@ -3,6 +3,7 @@ import json
 import httpx
 
 from app.providers import (
+    ProviderExecutionSettings,
     ProviderMessage,
     QwenProvider,
 )
@@ -15,6 +16,8 @@ def test_qwen_provider_normalizes_response():
         payload = json.loads(request.content)
 
         assert payload["model"] == ("qwen3.6-plus")
+        assert payload["temperature"] == 0.7
+        assert payload["max_tokens"] == 500
 
         assert payload["messages"] == [
             {
@@ -56,16 +59,21 @@ def test_qwen_provider_normalizes_response():
 
     result = provider.run(
         messages=[
-            ProviderMessage(
-                role="user",
-                content="Hello",
-            )
-        ]
+             ProviderMessage(
+            role="user",
+            content="Hello",
+        )
+        ],
+        settings=ProviderExecutionSettings(
+            temperature=0.7,
+            max_output_tokens=500,
+        ),
     )
 
     assert result.provider == "qwen"
     assert result.model == "qwen3.6-plus"
     assert result.output_text == "Hi there"
+    
 
     assert result.usage.input_tokens == 5
     assert result.usage.output_tokens == 3

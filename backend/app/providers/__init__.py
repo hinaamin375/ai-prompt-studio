@@ -1,5 +1,6 @@
 from app.providers.base import (
     ModelProvider,
+    ProviderExecutionSettings,
     ProviderMessage,
     ProviderResult,
     ProviderUsage,
@@ -15,9 +16,11 @@ from app.providers.registry import (
     build_provider_registry,
 )
 
+
 __all__ = [
     "GeminiProvider",
     "ModelProvider",
+    "ProviderExecutionSettings",
     "ProviderMessage",
     "ProviderRegistry",
     "ProviderResult",

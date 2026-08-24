@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.providers import (
     ModelProvider,
+    ProviderExecutionSettings,
     ProviderMessage,
     ProviderRegistry,
     ProviderResult,
@@ -31,11 +32,12 @@ class FakeProvider(ModelProvider):
         return "fake-model"
 
     def run(
-        self,
-        *,
-        messages: list[ProviderMessage],
-        model: str | None = None,
-    ) -> ProviderResult:
+    self,
+    *,
+    messages: list[ProviderMessage],
+    model: str | None = None,
+    settings: ProviderExecutionSettings | None = None,
+) -> ProviderResult:
         self.received_messages = messages
 
         return ProviderResult(

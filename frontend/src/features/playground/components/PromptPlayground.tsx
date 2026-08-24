@@ -49,6 +49,10 @@ interface PromptPlaygroundProps {
 }
 
 
+const DEFAULT_TEMPERATURE = 0.7;
+const DEFAULT_MAX_OUTPUT_TOKENS = 1000;
+
+
 function formatVariableLabel(
   variableName: string,
 ): string {
@@ -78,7 +82,10 @@ export function PromptPlayground({
     prompt.system_prompt,
     prompt.user_prompt,
   ]);
+
+
   const queryClient = useQueryClient();
+
 
   const [
     variableValues,
@@ -87,15 +94,33 @@ export function PromptPlayground({
     {},
   );
 
+
   const [
     providerId,
     setProviderId,
   ] = useState("");
 
+
   const [
     model,
     setModel,
   ] = useState("");
+
+
+  const [
+    temperature,
+    setTemperature,
+  ] = useState(
+    DEFAULT_TEMPERATURE,
+  );
+
+
+  const [
+    maxOutputTokens,
+    setMaxOutputTokens,
+  ] = useState(
+    DEFAULT_MAX_OUTPUT_TOKENS,
+  );
 
 
   const providersQuery = useQuery({
@@ -174,16 +199,17 @@ export function PromptPlayground({
         request,
       ),
 
-    onSuccess:async() => {
+    onSuccess: async () => {
       toast.success(
         "Prompt completed successfully",
       );
+
       await queryClient.invalidateQueries({
-  queryKey: [
-    "prompt-runs",
-    prompt.id,
-  ],
-});
+        queryKey: [
+          "prompt-runs",
+          prompt.id,
+        ],
+      });
     },
 
     onError: () => {
@@ -191,7 +217,7 @@ export function PromptPlayground({
         "Prompt execution failed",
         {
           description:
-            "Check the variables and provider, then try again.",
+            "Check the variables, provider, and execution settings, then try again.",
         },
       );
     },
@@ -242,6 +268,53 @@ export function PromptPlayground({
   }
 
 
+  function handleTemperatureChange(
+    value: string,
+  ): void {
+    const parsedValue =
+      Number(value);
+
+    if (Number.isNaN(parsedValue)) {
+      return;
+    }
+
+    setTemperature(parsedValue);
+
+    runMutation.reset();
+  }
+
+
+  function handleMaxOutputTokensChange(
+    value: string,
+  ): void {
+    const parsedValue =
+      Number(value);
+
+    if (Number.isNaN(parsedValue)) {
+      return;
+    }
+
+    setMaxOutputTokens(
+      Math.trunc(parsedValue),
+    );
+
+    runMutation.reset();
+  }
+
+
+  function handleResetSettings(): void {
+    setTemperature(
+      DEFAULT_TEMPERATURE,
+    );
+
+    setMaxOutputTokens(
+      DEFAULT_MAX_OUTPUT_TOKENS,
+    );
+
+    runMutation.reset();
+  }
+
+
   function handleRun(): void {
     if (!providerId || !model) {
       toast.error(
@@ -250,6 +323,34 @@ export function PromptPlayground({
 
       return;
     }
+
+
+    if (
+      temperature < 0 ||
+      temperature > 2
+    ) {
+      toast.error(
+        "Temperature must be between 0 and 2.",
+      );
+
+      return;
+    }
+
+
+    if (
+      !Number.isInteger(
+        maxOutputTokens,
+      ) ||
+      maxOutputTokens < 1 ||
+      maxOutputTokens > 32768
+    ) {
+      toast.error(
+        "Max output tokens must be between 1 and 32,768.",
+      );
+
+      return;
+    }
+
 
     const missingVariables =
       variableNames.filter(
@@ -278,11 +379,15 @@ export function PromptPlayground({
       return;
     }
 
+
     runMutation.mutate({
       provider: providerId,
       model,
       variables:
         variableValues,
+      temperature,
+      max_output_tokens:
+        maxOutputTokens,
     });
   }
 
@@ -321,7 +426,9 @@ export function PromptPlayground({
             AI Execution
           </p>
 
-          <h2>Prompt Playground</h2>
+          <h2>
+            Prompt Playground
+          </h2>
 
           <p>
             Run this saved prompt against a
@@ -334,7 +441,9 @@ export function PromptPlayground({
       <div className="playground-card">
         <div className="playground-section-heading">
           <div>
-            <h3>Model</h3>
+            <h3>
+              Model
+            </h3>
 
             <p>
               Choose which provider should
@@ -342,6 +451,7 @@ export function PromptPlayground({
             </p>
           </div>
         </div>
+
 
         {providers.length === 0 ? (
           <div className="analysis-empty-state">
@@ -369,7 +479,105 @@ export function PromptPlayground({
       <div className="playground-card">
         <div className="playground-section-heading">
           <div>
-            <h3>Variables</h3>
+            <h3>
+              Execution Settings
+            </h3>
+
+            <p>
+              Control how the selected model
+              generates its response.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="secondary-button"
+            disabled={
+              runMutation.isPending
+            }
+            onClick={
+              handleResetSettings
+            }
+          >
+            Reset
+          </button>
+        </div>
+
+
+        <div className="playground-settings-grid">
+          <div className="playground-field">
+            <label
+              htmlFor="playground-temperature"
+            >
+              Temperature
+            </label>
+
+            <input
+              id="playground-temperature"
+              type="number"
+              min="0"
+              max="2"
+              step="0.1"
+              value={temperature}
+              disabled={
+                runMutation.isPending
+              }
+              onChange={(event) =>
+                handleTemperatureChange(
+                  event.target.value,
+                )
+              }
+            />
+
+            <span className="playground-field-help">
+              Controls randomness. Lower
+              values are more predictable;
+              higher values are more varied.
+              Range: 0–2.
+            </span>
+          </div>
+
+
+          <div className="playground-field">
+            <label
+              htmlFor="playground-max-output-tokens"
+            >
+              Max Output Tokens
+            </label>
+
+            <input
+              id="playground-max-output-tokens"
+              type="number"
+              min="1"
+              max="32768"
+              step="1"
+              value={maxOutputTokens}
+              disabled={
+                runMutation.isPending
+              }
+              onChange={(event) =>
+                handleMaxOutputTokensChange(
+                  event.target.value,
+                )
+              }
+            />
+
+            <span className="playground-field-help">
+              Maximum number of tokens the
+              model may generate. Range:
+              1–32,768.
+            </span>
+          </div>
+        </div>
+      </div>
+
+
+      <div className="playground-card">
+        <div className="playground-section-heading">
+          <div>
+            <h3>
+              Variables
+            </h3>
 
             <p>
               Supply values for the prompt

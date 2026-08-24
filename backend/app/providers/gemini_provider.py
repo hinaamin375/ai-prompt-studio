@@ -4,6 +4,7 @@ import httpx
 
 from app.providers.base import (
     ModelProvider,
+    ProviderExecutionSettings,
     ProviderMessage,
     ProviderResult,
     ProviderUsage,
@@ -44,6 +45,7 @@ class GeminiProvider(ModelProvider):
         *,
         messages: list[ProviderMessage],
         model: str | None = None,
+        settings: ProviderExecutionSettings | None = None,
     ) -> ProviderResult:
         model_name = model or self.default_model
 
@@ -52,7 +54,9 @@ class GeminiProvider(ModelProvider):
 
         for message in messages:
             if message.role == "system":
-                system_parts.append(message.content)
+                system_parts.append(
+                    message.content
+                )
                 continue
 
             if message.role == "user":
@@ -85,13 +89,36 @@ class GeminiProvider(ModelProvider):
             payload["systemInstruction"] = {
                 "parts": [
                     {
-                        "text": "\n\n".join(system_parts),
+                        "text": "\n\n".join(
+                            system_parts
+                        ),
                     }
                 ],
             }
 
+        generation_config: dict[str, object] = {}
+
+        if settings is not None:
+            if settings.temperature is not None:
+                generation_config["temperature"] = (
+                    settings.temperature
+                )
+
+            if settings.max_output_tokens is not None:
+                generation_config[
+                    "maxOutputTokens"
+                ] = settings.max_output_tokens
+
+        if generation_config:
+            payload["generationConfig"] = (
+                generation_config
+            )
+
         response = self._client.post(
-            (f"{self._base_url}/models/{model_name}:generateContent"),
+            (
+                f"{self._base_url}/models/"
+                f"{model_name}:generateContent"
+            ),
             headers={
                 "x-goog-api-key": self._api_key,
                 "Content-Type": "application/json",
@@ -109,9 +136,15 @@ class GeminiProvider(ModelProvider):
         )
 
         if not candidates:
-            raise ValueError("Gemini returned no response candidates.")
+            raise ValueError(
+                "Gemini returned no response candidates."
+            )
 
-        parts = candidates[0].get("content", {}).get("parts", [])
+        parts = (
+            candidates[0]
+            .get("content", {})
+            .get("parts", [])
+        )
 
         text_parts = [
             part["text"]
@@ -124,7 +157,9 @@ class GeminiProvider(ModelProvider):
         ]
 
         if not text_parts:
-            raise ValueError("Gemini returned no text content.")
+            raise ValueError(
+                "Gemini returned no text content."
+            )
 
         usage = data.get(
             "usageMetadata",
@@ -136,8 +171,14 @@ class GeminiProvider(ModelProvider):
             model=model_name,
             output_text="".join(text_parts),
             usage=ProviderUsage(
-                input_tokens=usage.get("promptTokenCount"),
-                output_tokens=usage.get("candidatesTokenCount"),
-                total_tokens=usage.get("totalTokenCount"),
+                input_tokens=usage.get(
+                    "promptTokenCount"
+                ),
+                output_tokens=usage.get(
+                    "candidatesTokenCount"
+                ),
+                total_tokens=usage.get(
+                    "totalTokenCount"
+                ),
             ),
         )

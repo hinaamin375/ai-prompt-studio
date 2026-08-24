@@ -33,7 +33,28 @@ function formatTokens(
     "en",
   ).format(value);
 }
+function formatTemperature(
+  value: number | null,
+): string {
+  if (value === null) {
+    return "—";
+  }
 
+  return value.toString();
+}
+
+
+function formatMaxOutputTokens(
+  value: number | null,
+): string {
+  if (value === null) {
+    return "—";
+  }
+
+  return new Intl.NumberFormat(
+    "en",
+  ).format(value);
+}
 
 function providerLabel(
   provider: string,
@@ -187,7 +208,42 @@ export function RunHistoryComparison({
             {runB.model}
           </span>
         </div>
+<div className="run-comparison-row">
+  <span>
+    Temperature
+  </span>
 
+  <span>
+    {formatTemperature(
+      runA.temperature,
+    )}
+  </span>
+
+  <span>
+    {formatTemperature(
+      runB.temperature,
+    )}
+  </span>
+</div>
+
+
+<div className="run-comparison-row">
+  <span>
+    Max output tokens
+  </span>
+
+  <span>
+    {formatMaxOutputTokens(
+      runA.max_output_tokens,
+    )}
+  </span>
+
+  <span>
+    {formatMaxOutputTokens(
+      runB.max_output_tokens,
+    )}
+  </span>
+</div>
 
         <div className="run-comparison-row">
           <span>

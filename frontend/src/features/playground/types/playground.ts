@@ -9,7 +9,11 @@ export interface Provider {
 export interface PromptRunRequest {
   provider: string;
   model?: string | null;
+
   variables: Record<string, string>;
+
+  temperature?: number | null;
+  max_output_tokens?: number | null;
 }
 
 

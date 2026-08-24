@@ -62,7 +62,28 @@ function formatTokens(
     "en",
   ).format(tokens);
 }
+function formatTemperature(
+  temperature: number | null,
+): string {
+  if (temperature === null) {
+    return "—";
+  }
 
+  return temperature.toString();
+}
+
+
+function formatMaxOutputTokens(
+  maxOutputTokens: number | null,
+): string {
+  if (maxOutputTokens === null) {
+    return "—";
+  }
+
+  return new Intl.NumberFormat(
+    "en",
+  ).format(maxOutputTokens);
+}
 
 function formatProvider(
   provider: string,
@@ -402,55 +423,79 @@ export function PromptRunHistory({
 
                   {expanded && (
                     <div className="prompt-run-details">
-                      <div className="prompt-run-token-grid">
-                        <div>
-                          <span>
-                            Input
-                          </span>
+                   <div className="prompt-run-token-grid">
+  <div>
+    <span>
+      Temperature
+    </span>
 
-                          <strong>
-                            {formatTokens(
-                              run.input_tokens,
-                            )}
-                          </strong>
-                        </div>
+    <strong>
+      {formatTemperature(
+        run.temperature,
+      )}
+    </strong>
+  </div>
 
-                        <div>
-                          <span>
-                            Output
-                          </span>
+  <div>
+    <span>
+      Max Output
+    </span>
 
-                          <strong>
-                            {formatTokens(
-                              run.output_tokens,
-                            )}
-                          </strong>
-                        </div>
+    <strong>
+      {formatMaxOutputTokens(
+        run.max_output_tokens,
+      )}
+    </strong>
+  </div>
 
-                        <div>
-                          <span>
-                            Total
-                          </span>
+  <div>
+    <span>
+      Input
+    </span>
 
-                          <strong>
-                            {formatTokens(
-                              run.total_tokens,
-                            )}
-                          </strong>
-                        </div>
+    <strong>
+      {formatTokens(
+        run.input_tokens,
+      )}
+    </strong>
+  </div>
 
-                        <div>
-                          <span>
-                            Runtime
-                          </span>
+  <div>
+    <span>
+      Output
+    </span>
 
-                          <strong>
-                            {formatDuration(
-                              run.duration_ms,
-                            )}
-                          </strong>
-                        </div>
-                      </div>
+    <strong>
+      {formatTokens(
+        run.output_tokens,
+      )}
+    </strong>
+  </div>
+
+  <div>
+    <span>
+      Total
+    </span>
+
+    <strong>
+      {formatTokens(
+        run.total_tokens,
+      )}
+    </strong>
+  </div>
+
+  <div>
+    <span>
+      Runtime
+    </span>
+
+    <strong>
+      {formatDuration(
+        run.duration_ms,
+      )}
+    </strong>
+  </div>
+</div>
 
 
                       {Object.keys(

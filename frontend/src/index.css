@@ -4614,3 +4614,26 @@ box-shadow:
     gap: 0.25rem;
   }
 }
+/* Playground execution settings */
+
+.playground-settings-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.playground-field-help {
+  display: block;
+  margin-top: 7px;
+  color: #667085;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .playground-settings-grid {
+    grid-template-columns: 1fr;
+  }
+}

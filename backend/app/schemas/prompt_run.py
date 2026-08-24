@@ -23,6 +23,18 @@ class PromptRunRequest(BaseModel):
         default_factory=dict,
     )
 
+    temperature: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=2.0,
+    )
+
+    max_output_tokens: int | None = Field(
+        default=None,
+        ge=1,
+        le=32768,
+    )
+
 
 class PromptRunUsage(BaseModel):
     input_tokens: int | None = None

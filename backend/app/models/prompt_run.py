@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     JSON,
@@ -57,6 +58,16 @@ class PromptRun(Base):
         JSON,
         nullable=False,
         default=dict,
+    )
+
+    temperature: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    max_output_tokens: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
     )
 
     output_text: Mapped[str] = mapped_column(

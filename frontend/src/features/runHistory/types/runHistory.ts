@@ -7,6 +7,9 @@ export interface PromptRunHistory {
 
   variables: Record<string, unknown>;
 
+  temperature: number | null;
+  max_output_tokens: number | null;
+
   output_text: string;
   duration_ms: number;
 
