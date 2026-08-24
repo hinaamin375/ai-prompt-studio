@@ -42,6 +42,21 @@ from app.schemas.prompt_run_history import (
 from app.services.prompt_run_history_service import (
     prompt_run_history_service,
 )
+from app.services.prompt_test_case_service import (
+    prompt_test_case_service,
+)
+from app.schemas.prompt_test_case import (
+    PromptTestCaseCreate,
+    PromptTestCaseResponse,
+    PromptTestCaseUpdate,
+)
+from app.schemas.prompt_test_case_run import (
+    PromptTestCaseRunRequest,
+    PromptTestCaseRunResponse,
+)
+from app.services.prompt_test_case_run_service import (
+    prompt_test_case_run_service,
+)
 
 router = APIRouter(
     prefix="/prompts",
@@ -213,8 +228,117 @@ def run_prompt(
         prompt_id=prompt_id,
         data=data,
     )
+@router.post(
+    "/{prompt_id}/test-cases",
+    response_model=PromptTestCaseResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_prompt_test_case(
+    prompt_id: int,
+    data: PromptTestCaseCreate,
+    db: DatabaseSession,
+) -> PromptTestCaseResponse:
+    return (
+        prompt_test_case_service.create_test_case(
+            db,
+            prompt_id,
+            data,
+        )
+    )
 
 
+@router.get(
+    "/{prompt_id}/test-cases",
+    response_model=list[
+        PromptTestCaseResponse
+    ],
+)
+def list_prompt_test_cases(
+    prompt_id: int,
+    db: DatabaseSession,
+) -> list[PromptTestCaseResponse]:
+    return (
+        prompt_test_case_service.list_test_cases(
+            db,
+            prompt_id,
+        )
+    )
+
+
+@router.get(
+    "/{prompt_id}/test-cases/{test_case_id}",
+    response_model=PromptTestCaseResponse,
+)
+def get_prompt_test_case(
+    prompt_id: int,
+    test_case_id: int,
+    db: DatabaseSession,
+) -> PromptTestCaseResponse:
+    return (
+        prompt_test_case_service.get_test_case(
+            db,
+            prompt_id,
+            test_case_id,
+        )
+    )
+
+
+@router.patch(
+    "/{prompt_id}/test-cases/{test_case_id}",
+    response_model=PromptTestCaseResponse,
+)
+def update_prompt_test_case(
+    prompt_id: int,
+    test_case_id: int,
+    data: PromptTestCaseUpdate,
+    db: DatabaseSession,
+) -> PromptTestCaseResponse:
+    return (
+        prompt_test_case_service.update_test_case(
+            db,
+            prompt_id,
+            test_case_id,
+            data,
+        )
+    )
+
+
+@router.delete(
+    "/{prompt_id}/test-cases/{test_case_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_prompt_test_case(
+    prompt_id: int,
+    test_case_id: int,
+    db: DatabaseSession,
+) -> Response:
+    prompt_test_case_service.delete_test_case(
+        db,
+        prompt_id,
+        test_case_id,
+    )
+
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT,
+    )
+@router.post(
+    "/{prompt_id}/test-cases/{test_case_id}/run",
+    response_model=PromptTestCaseRunResponse,
+)
+def run_prompt_test_case(
+    prompt_id: int,
+    test_case_id: int,
+    data: PromptTestCaseRunRequest,
+    db: DatabaseSession,
+) -> PromptTestCaseRunResponse:
+    return (
+        prompt_test_case_run_service.run_test_case(
+            db,
+            prompt_id,
+            test_case_id,
+            data,
+        )
+    )
 @router.get(
     "/{prompt_id}",
     response_model=PromptResponse,

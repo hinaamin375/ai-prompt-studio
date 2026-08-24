@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from app.models.prompt_run import PromptRun
     from app.models.prompt_version import PromptVersion
     from app.models.tag import Tag
+    from app.models.prompt_test_case import PromptTestCase
 
 
 class Prompt(Base):
@@ -95,6 +96,11 @@ class Prompt(Base):
         passive_deletes=True,
     )
     runs: Mapped[list["PromptRun"]] = relationship(
+        back_populates="prompt",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    test_cases: Mapped[list["PromptTestCase"]] = relationship(
         back_populates="prompt",
         cascade="all, delete-orphan",
         passive_deletes=True,

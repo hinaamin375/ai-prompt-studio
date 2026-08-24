@@ -29,6 +29,9 @@ import {
 import {
   PromptRunHistory,
 } from "../features/runHistory";
+import {
+  PromptTestCases,
+} from "../features/testCases";
 
 export function EditPromptPage() {
   const params = useParams();
@@ -202,9 +205,14 @@ export function EditPromptPage() {
   prompt={promptQuery.data}
 />
       </div>
-      <PromptPlayground
+ <PromptPlayground
   prompt={promptQuery.data}
 />
+
+<PromptTestCases
+  prompt={promptQuery.data}
+/>
+
 <PromptRunHistory
   promptId={promptId}
 />
