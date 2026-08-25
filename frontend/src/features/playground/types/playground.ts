@@ -25,6 +25,7 @@ export interface PromptRunUsage {
 
 
 export interface PromptRunResponse {
+    id: number;
   provider: string;
   model: string;
   output_text: string;

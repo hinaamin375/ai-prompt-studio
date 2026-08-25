@@ -43,6 +43,7 @@ class PromptRunUsage(BaseModel):
 
 
 class PromptRunResponse(BaseModel):
+    id: int
     provider: str
     model: str
 

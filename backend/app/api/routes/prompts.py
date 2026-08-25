@@ -57,6 +57,13 @@ from app.schemas.prompt_test_case_run import (
 from app.services.prompt_test_case_run_service import (
     prompt_test_case_run_service,
 )
+from app.schemas.prompt_test_suite_run import (
+    PromptTestSuiteRunRequest,
+    PromptTestSuiteRunResponse,
+)
+from app.services.prompt_test_suite_run_service import (
+    prompt_test_suite_run_service,
+)
 
 router = APIRouter(
     prefix="/prompts",
@@ -384,4 +391,69 @@ def delete_prompt(
 
     return Response(
         status_code=status.HTTP_204_NO_CONTENT,
+    )
+@router.post(
+    "/{prompt_id}/test-suite-runs",
+    response_model=PromptTestSuiteRunResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def run_prompt_test_suite(
+    prompt_id: int,
+    data: PromptTestSuiteRunRequest,
+    db: DatabaseSession,
+) -> PromptTestSuiteRunResponse:
+    """
+    Run all saved test cases for a prompt and
+    persist the regression test suite result.
+    """
+    return (
+        prompt_test_suite_run_service.run_suite(
+            db=db,
+            prompt_id=prompt_id,
+            data=data,
+        )
+    )
+
+@router.get(
+    "/{prompt_id}/test-suite-runs",
+    response_model=list[
+        PromptTestSuiteRunResponse
+    ],
+)
+def list_prompt_test_suite_runs(
+    prompt_id: int,
+    db: DatabaseSession,
+) -> list[PromptTestSuiteRunResponse]:
+    """
+    Return persisted regression test suite
+    history for a prompt.
+    """
+    return (
+        prompt_test_suite_run_service
+        .list_suite_runs(
+            db=db,
+            prompt_id=prompt_id,
+        )
+    )
+
+@router.get(
+    "/{prompt_id}/test-suite-runs/{suite_run_id}",
+    response_model=PromptTestSuiteRunResponse,
+)
+def get_prompt_test_suite_run(
+    prompt_id: int,
+    suite_run_id: int,
+    db: DatabaseSession,
+) -> PromptTestSuiteRunResponse:
+    """
+    Return one persisted regression test suite
+    run including its individual test results.
+    """
+    return (
+        prompt_test_suite_run_service
+        .get_suite_run(
+            db=db,
+            prompt_id=prompt_id,
+            suite_run_id=suite_run_id,
+        )
     )
