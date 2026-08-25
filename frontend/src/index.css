@@ -5029,3 +5029,100 @@ box-shadow:
 
   border-top: 1px solid #e4e8ef;
 }
+.regression-history {
+  margin-top: 2rem;
+}
+
+.regression-history-heading {
+  margin-bottom: 1rem;
+}
+
+.regression-history-heading h2 {
+  margin-bottom: 0.35rem;
+}
+
+.regression-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.regression-history-card {
+  padding: 1.25rem;
+
+  background: #ffffff;
+  border: 1px solid #dfe4ee;
+  border-radius: 12px;
+}
+
+.regression-history-card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.regression-history-card-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.regression-history-card-heading span {
+  color: #667085;
+  font-size: 0.85rem;
+}
+
+.regression-history-status {
+  margin: 0.75rem 0;
+}
+
+.regression-status-passed {
+  color: #157347;
+}
+
+.regression-status-failed {
+  color: #b42318;
+}
+
+.regression-result-list {
+  display: flex;
+  flex-direction: column;
+
+  margin-top: 1rem;
+
+  border-top: 1px solid #e4e8ef;
+}
+
+.regression-result-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 0.75rem 0;
+
+  border-bottom: 1px solid #e4e8ef;
+}
+
+.regression-result-row span {
+  color: #667085;
+  font-size: 0.85rem;
+}
+
+.regression-history-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  margin-top: 1rem;
+
+  color: #667085;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 700px) {
+  .regression-history-card-heading,
+  .regression-result-row {
+    flex-direction: column;
+  }
+}

@@ -8,6 +8,8 @@ import type {
   PromptTestCaseRunRequest,
   PromptTestCaseRunResponse,
   PromptTestCaseUpdate,
+  PromptTestSuiteRunRequest,
+  PromptTestSuiteRunResponse,
 } from "../types/testCase";
 
 
@@ -75,6 +77,46 @@ export async function runPromptTestCase(
   >(
     `/prompts/${promptId}/test-cases/${testCaseId}/run`,
     data,
+  );
+
+  return response.data;
+}
+export async function runPromptTestSuite(
+  promptId: number,
+  data: PromptTestSuiteRunRequest,
+): Promise<PromptTestSuiteRunResponse> {
+  const response = await apiClient.post<
+    PromptTestSuiteRunResponse
+  >(
+    `/prompts/${promptId}/test-suite-runs`,
+    data,
+  );
+
+  return response.data;
+}
+
+
+export async function listPromptTestSuiteRuns(
+  promptId: number,
+): Promise<PromptTestSuiteRunResponse[]> {
+  const response = await apiClient.get<
+    PromptTestSuiteRunResponse[]
+  >(
+    `/prompts/${promptId}/test-suite-runs`,
+  );
+
+  return response.data;
+}
+
+
+export async function getPromptTestSuiteRun(
+  promptId: number,
+  suiteRunId: number,
+): Promise<PromptTestSuiteRunResponse> {
+  const response = await apiClient.get<
+    PromptTestSuiteRunResponse
+  >(
+    `/prompts/${promptId}/test-suite-runs/${suiteRunId}`,
   );
 
   return response.data;

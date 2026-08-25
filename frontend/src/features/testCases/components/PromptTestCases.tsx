@@ -29,7 +29,9 @@ import {
   createPromptTestCase,
   deletePromptTestCase,
   listPromptTestCases,
+  listPromptTestSuiteRuns,
   runPromptTestCase,
+  runPromptTestSuite,
   updatePromptTestCase,
 } from "../api/testCases";
 
@@ -38,7 +40,9 @@ import type {
   PromptTestCaseRunRequest,
   PromptTestCaseRunResponse,
 } from "../types/testCase";
-
+import {
+  RegressionHistory,
+} from "./RegressionHistory";
 import {
   TestCaseForm,
 } from "./TestCaseForm";
@@ -92,13 +96,7 @@ const [
   setIsRunningAll,
 ] = useState(false);
 
-const [
-  runAllProgress,
-  setRunAllProgress,
-] = useState({
-  current: 0,
-  total: 0,
-});
+
   const [
     runResults,
     setRunResults,
@@ -134,7 +132,17 @@ const [
         prompt.id,
       ),
   });
+const suiteHistoryQuery = useQuery({
+  queryKey: [
+    "prompt-test-suite-runs",
+    prompt.id,
+  ],
 
+  queryFn: () =>
+    listPromptTestSuiteRuns(
+      prompt.id,
+    ),
+});
 
   const providersQuery = useQuery({
     queryKey: ["providers"],
@@ -364,7 +372,7 @@ const updateMutation = useMutation({
       },
     });
   }
-  async function handleRunAll(): Promise<void> {
+async function handleRunAll(): Promise<void> {
   if (!selectedProvider) {
     toast.error(
       "Select a configured provider.",
@@ -383,59 +391,24 @@ const updateMutation = useMutation({
 
   setIsRunningAll(true);
 
-  setRunAllProgress({
-    current: 0,
-    total: testCases.length,
-  });
-
-  const nextResults: Record<
-    number,
-    PromptTestCaseRunResponse
-  > = {
-    ...runResults,
-  };
-
   try {
-    for (
-      let index = 0;
-      index < testCases.length;
-      index += 1
-    ) {
-      const testCase =
-        testCases[index];
+    const suite =
+      await runPromptTestSuite(
+        prompt.id,
+        {
+          provider:
+            selectedProvider.id,
 
-      setRunAllProgress({
-        current: index + 1,
-        total: testCases.length,
-      });
+          model:
+            selectedProvider
+              .default_model,
 
-      const result =
-        await runPromptTestCase(
-          prompt.id,
-          testCase.id,
-          {
-            provider:
-              selectedProvider.id,
+          temperature,
 
-            model:
-              selectedProvider
-                .default_model,
-
-            temperature,
-
-            max_output_tokens:
-              maxOutputTokens,
-          },
-        );
-
-      nextResults[
-        testCase.id
-      ] = result;
-
-      setRunResults({
-        ...nextResults,
-      });
-    }
+          max_output_tokens:
+            maxOutputTokens,
+        },
+      );
 
     await queryClient.invalidateQueries({
       queryKey: [
@@ -444,46 +417,32 @@ const updateMutation = useMutation({
       ],
     });
 
-    const results =
-      Object.values(
-        nextResults,
-      ).filter(
-        (result) =>
-          testCases.some(
-            (testCase) =>
-              testCase.id ===
-              result.test_case_id,
-          ),
-      );
+    await queryClient.invalidateQueries({
+      queryKey: [
+        "prompt-test-suite-runs",
+        prompt.id,
+      ],
+    });
 
-    const passedTests =
-      results.filter(
-        (result) =>
-          result.passed,
-      ).length;
-
-    if (
-      passedTests === testCases.length
-    ) {
+    if (suite.failed_tests === 0) {
       toast.success(
-        `All ${testCases.length} tests passed`,
+        `All ${suite.total_tests} tests passed`,
       );
     } else {
       toast.error(
-        `${passedTests} of ${testCases.length} tests passed`,
+        `${suite.passed_tests} of ${suite.total_tests} tests passed`,
+        {
+          description:
+            `${suite.failed_assertions} assertions failed.`,
+        },
       );
     }
   } catch {
     toast.error(
-      "Test suite stopped because a test could not be executed.",
+      "Could not run the test suite.",
     );
   } finally {
     setIsRunningAll(false);
-
-    setRunAllProgress({
-      current: 0,
-      total: 0,
-    });
   }
 }
 
@@ -518,8 +477,8 @@ const updateMutation = useMutation({
     }}
   >
     {isRunningAll
-      ? `Running ${runAllProgress.current} / ${runAllProgress.total}...`
-      : "▶ Run All Tests"}
+  ? "Running All Tests..."
+  : "▶ Run All Tests"}
   </button>
 
   <button
@@ -671,88 +630,7 @@ const updateMutation = useMutation({
         </div>
       </div>
 
-{Object.keys(runResults).length > 0 && (
-  <div className="test-suite-summary">
-    {(() => {
-      const currentResults =
-        testCases
-          .map(
-            (testCase) =>
-              runResults[
-                testCase.id
-              ],
-          )
-          .filter(
-            (
-              result,
-            ): result is PromptTestCaseRunResponse =>
-              Boolean(result),
-          );
 
-      if (
-        currentResults.length === 0
-      ) {
-        return null;
-      }
-
-      const passedTests =
-        currentResults.filter(
-          (result) =>
-            result.passed,
-        ).length;
-
-      const totalAssertions =
-        currentResults.reduce(
-          (
-            total,
-            result,
-          ) =>
-            total +
-            result.assertions.length,
-          0,
-        );
-
-      const passedAssertions =
-        currentResults.reduce(
-          (
-            total,
-            result,
-          ) =>
-            total +
-            result.passed_count,
-          0,
-        );
-
-      return (
-        <>
-          <div>
-            <span>
-              Tests passed
-            </span>
-
-            <strong>
-              {passedTests}
-              {" / "}
-              {currentResults.length}
-            </strong>
-          </div>
-
-          <div>
-            <span>
-              Assertions passed
-            </span>
-
-            <strong>
-              {passedAssertions}
-              {" / "}
-              {totalAssertions}
-            </strong>
-          </div>
-        </>
-      );
-    })()}
-  </div>
-)}
       {testCasesQuery.isPending ? (
         <div className="analysis-empty-state">
           Loading test cases...
@@ -992,7 +870,19 @@ const updateMutation = useMutation({
             },
           )}
         </div>
+        
       )}
+      <RegressionHistory
+  runs={
+    suiteHistoryQuery.data ?? []
+  }
+  isLoading={
+    suiteHistoryQuery.isPending
+  }
+  isError={
+    suiteHistoryQuery.isError
+  }
+/>
     </section>
   );
 }
