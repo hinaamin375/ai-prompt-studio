@@ -21,8 +21,12 @@ from sqlalchemy.orm import (
 
 from app.db.base import Base
 
+
 if TYPE_CHECKING:
     from app.models.prompt import Prompt
+    from app.models.prompt_test_suite_run import (
+        PromptTestSuiteRun,
+    )
 
 
 class PromptVersion(Base):
@@ -32,7 +36,10 @@ class PromptVersion(Base):
         UniqueConstraint(
             "prompt_id",
             "version",
-            name="uq_prompt_versions_prompt_id_version",
+            name=(
+                "uq_prompt_versions_"
+                "prompt_id_version"
+            ),
         ),
     )
 
@@ -50,9 +57,11 @@ class PromptVersion(Base):
         index=True,
     )
 
-    version: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
+    version: Mapped[int] = (
+        mapped_column(
+            Integer,
+            nullable=False,
+        )
     )
 
     title: Mapped[str] = mapped_column(
@@ -60,29 +69,39 @@ class PromptVersion(Base):
         nullable=False,
     )
 
-    description: Mapped[str | None] = mapped_column(
+    description: Mapped[
+        str | None
+    ] = mapped_column(
         Text,
         nullable=True,
     )
 
-    system_prompt: Mapped[str | None] = mapped_column(
+    system_prompt: Mapped[
+        str | None
+    ] = mapped_column(
         Text,
         nullable=True,
     )
 
-    user_prompt: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
+    user_prompt: Mapped[str] = (
+        mapped_column(
+            Text,
+            nullable=False,
+        )
     )
 
-    favorite: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=False,
-        server_default="0",
+    favorite: Mapped[bool] = (
+        mapped_column(
+            Boolean,
+            nullable=False,
+            default=False,
+            server_default="0",
+        )
     )
 
-    collection_id: Mapped[int | None] = mapped_column(
+    collection_id: Mapped[
+        int | None
+    ] = mapped_column(
         ForeignKey(
             "collections.id",
             ondelete="SET NULL",
@@ -91,12 +110,28 @@ class PromptVersion(Base):
         index=True,
     )
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+    created_at: Mapped[
+        datetime
+    ] = mapped_column(
+        DateTime(
+            timezone=True,
+        ),
         server_default=func.now(),
         nullable=False,
     )
 
-    prompt: Mapped["Prompt"] = relationship(
+    prompt: Mapped[
+        "Prompt"
+    ] = relationship(
         back_populates="versions",
+    )
+
+    test_suite_runs: Mapped[
+        list[
+            "PromptTestSuiteRun"
+        ]
+    ] = relationship(
+        back_populates=(
+            "prompt_version"
+        ),
     )

@@ -25,10 +25,15 @@ if TYPE_CHECKING:
     from app.models.prompt_test_case_result import (
         PromptTestCaseResult,
     )
+    from app.models.prompt_version import (
+        PromptVersion,
+    )
 
 
 class PromptTestSuiteRun(Base):
-    __tablename__ = "prompt_test_suite_runs"
+    __tablename__ = (
+        "prompt_test_suite_runs"
+    )
 
     id: Mapped[int] = mapped_column(
         primary_key=True,
@@ -44,6 +49,17 @@ class PromptTestSuiteRun(Base):
         index=True,
     )
 
+    prompt_version_id: Mapped[
+        int | None
+    ] = mapped_column(
+        ForeignKey(
+            "prompt_versions.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
     provider: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
@@ -55,61 +71,99 @@ class PromptTestSuiteRun(Base):
         nullable=False,
     )
 
-    temperature: Mapped[float | None] = mapped_column(
+    temperature: Mapped[
+        float | None
+    ] = mapped_column(
         Float,
         nullable=True,
     )
 
-    max_output_tokens: Mapped[int | None] = mapped_column(
+    max_output_tokens: Mapped[
+        int | None
+    ] = mapped_column(
         Integer,
         nullable=True,
     )
 
-    total_tests: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
+    total_tests: Mapped[int] = (
+        mapped_column(
+            Integer,
+            nullable=False,
+        )
     )
 
-    passed_tests: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
+    passed_tests: Mapped[int] = (
+        mapped_column(
+            Integer,
+            nullable=False,
+        )
     )
 
-    failed_tests: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
+    failed_tests: Mapped[int] = (
+        mapped_column(
+            Integer,
+            nullable=False,
+        )
     )
 
-    total_assertions: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
+    total_assertions: Mapped[int] = (
+        mapped_column(
+            Integer,
+            nullable=False,
+        )
     )
 
-    passed_assertions: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
+    passed_assertions: Mapped[int] = (
+        mapped_column(
+            Integer,
+            nullable=False,
+        )
     )
 
-    failed_assertions: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
+    failed_assertions: Mapped[int] = (
+        mapped_column(
+            Integer,
+            nullable=False,
+        )
     )
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+    created_at: Mapped[
+        datetime
+    ] = mapped_column(
+        DateTime(
+            timezone=True,
+        ),
         server_default=func.now(),
         nullable=False,
         index=True,
     )
 
-    prompt: Mapped["Prompt"] = relationship(
-        back_populates="test_suite_runs",
+    prompt: Mapped[
+        "Prompt"
+    ] = relationship(
+        back_populates=(
+            "test_suite_runs"
+        ),
+    )
+
+    prompt_version: Mapped[
+        "PromptVersion | None"
+    ] = relationship(
+        back_populates=(
+            "test_suite_runs"
+        ),
     )
 
     results: Mapped[
-        list["PromptTestCaseResult"]
+        list[
+            "PromptTestCaseResult"
+        ]
     ] = relationship(
-        back_populates="suite_run",
-        cascade="all, delete-orphan",
+        back_populates=(
+            "suite_run"
+        ),
+        cascade=(
+            "all, delete-orphan"
+        ),
         passive_deletes=True,
     )

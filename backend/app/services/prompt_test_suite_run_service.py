@@ -16,12 +16,18 @@ from app.schemas.prompt_test_case_run import (
 from app.schemas.prompt_test_suite_run import (
     PromptTestSuiteRunRequest,
 )
+from app.services.prompt_service import (
+    prompt_service,
+)
 from app.services.prompt_test_case_run_service import (
     PromptTestCaseRunService,
     prompt_test_case_run_service,
 )
 from app.services.prompt_test_case_service import (
     prompt_test_case_service,
+)
+from app.services.prompt_version_service import (
+    prompt_version_service,
 )
 
 
@@ -44,8 +50,27 @@ class PromptTestSuiteRunService:
         prompt_id: int,
         data: PromptTestSuiteRunRequest,
     ) -> PromptTestSuiteRun:
+        prompt = prompt_service.get_prompt(
+            db,
+            prompt_id,
+        )
+
+        prompt_version = (
+            prompt_version_service
+            .ensure_current_version(
+                db,
+                prompt,
+            )
+        )
+
+        # A new current-version snapshot may have
+        # been created. Flush it so its database ID
+        # can be used by the suite-run foreign key.
+        db.flush()
+
         test_cases = (
-            prompt_test_case_service.list_test_cases(
+            prompt_test_case_service
+            .list_test_cases(
                 db,
                 prompt_id,
             )
@@ -62,14 +87,17 @@ class PromptTestSuiteRunService:
 
         for test_case in test_cases:
             result = (
-                self._test_case_run_service.run_test_case(
+                self._test_case_run_service
+                .run_test_case(
                     db=db,
                     prompt_id=prompt_id,
                     test_case_id=test_case.id,
                     data=PromptTestCaseRunRequest(
                         provider=data.provider,
                         model=data.model,
-                        temperature=data.temperature,
+                        temperature=(
+                            data.temperature
+                        ),
                         max_output_tokens=(
                             data.max_output_tokens
                         ),
@@ -77,7 +105,9 @@ class PromptTestSuiteRunService:
                 )
             )
 
-            case_results.append(result)
+            case_results.append(
+                result,
+            )
 
         passed_tests = sum(
             1
@@ -85,10 +115,13 @@ class PromptTestSuiteRunService:
             if result.passed
         )
 
-        total_tests = len(case_results)
+        total_tests = len(
+            case_results,
+        )
 
         failed_tests = (
-            total_tests - passed_tests
+            total_tests
+            - passed_tests
         )
 
         passed_assertions = sum(
@@ -106,22 +139,45 @@ class PromptTestSuiteRunService:
             + failed_assertions
         )
 
-        first_run = case_results[0].run
+        first_run = (
+            case_results[0].run
+        )
 
         suite_run = PromptTestSuiteRun(
             prompt_id=prompt_id,
-            provider=first_run.provider,
-            model=first_run.model,
-            temperature=data.temperature,
+            prompt_version_id=(
+                prompt_version.id
+            ),
+            provider=(
+                first_run.provider
+            ),
+            model=(
+                first_run.model
+            ),
+            temperature=(
+                data.temperature
+            ),
             max_output_tokens=(
                 data.max_output_tokens
             ),
-            total_tests=total_tests,
-            passed_tests=passed_tests,
-            failed_tests=failed_tests,
-            total_assertions=total_assertions,
-            passed_assertions=passed_assertions,
-            failed_assertions=failed_assertions,
+            total_tests=(
+                total_tests
+            ),
+            passed_tests=(
+                passed_tests
+            ),
+            failed_tests=(
+                failed_tests
+            ),
+            total_assertions=(
+                total_assertions
+            ),
+            passed_assertions=(
+                passed_assertions
+            ),
+            failed_assertions=(
+                failed_assertions
+            ),
         )
 
         suite_run.results = [
@@ -135,7 +191,9 @@ class PromptTestSuiteRunService:
                 test_case_name=(
                     result.test_case_name
                 ),
-                passed=result.passed,
+                passed=(
+                    result.passed
+                ),
                 passed_count=(
                     result.passed_count
                 ),
@@ -152,7 +210,8 @@ class PromptTestSuiteRunService:
         ]
 
         return (
-            prompt_test_suite_run_repository.create(
+            prompt_test_suite_run_repository
+            .create(
                 db,
                 suite_run,
             )
@@ -163,8 +222,8 @@ class PromptTestSuiteRunService:
         db: Session,
         prompt_id: int,
     ) -> list[PromptTestSuiteRun]:
-        # Also verifies that the prompt exists.
-        prompt_test_case_service.list_test_cases(
+        # Verify that the prompt exists.
+        prompt_service.get_prompt(
             db,
             prompt_id,
         )
@@ -183,14 +242,15 @@ class PromptTestSuiteRunService:
         prompt_id: int,
         suite_run_id: int,
     ) -> PromptTestSuiteRun:
-        # Also verifies that the prompt exists.
-        prompt_test_case_service.list_test_cases(
+        # Verify that the prompt exists.
+        prompt_service.get_prompt(
             db,
             prompt_id,
         )
 
         suite_run = (
-            prompt_test_suite_run_repository.get_by_id(
+            prompt_test_suite_run_repository
+            .get_by_id(
                 db,
                 prompt_id,
                 suite_run_id,
@@ -201,7 +261,9 @@ class PromptTestSuiteRunService:
             raise ApplicationError(
                 "The requested prompt test suite run "
                 "was not found.",
-                code="prompt_test_suite_run_not_found",
+                code=(
+                    "prompt_test_suite_run_not_found"
+                ),
                 status_code=404,
             )
 

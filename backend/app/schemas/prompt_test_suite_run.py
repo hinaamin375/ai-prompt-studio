@@ -6,15 +6,14 @@ from pydantic import (
     Field,
 )
 
-from app.schemas.prompt_run import (
-    PromptRunResponse,
-)
 from app.schemas.prompt_test_case_run import (
     PromptTestAssertionResult,
 )
 
 
-class PromptTestSuiteRunRequest(BaseModel):
+class PromptTestSuiteRunRequest(
+    BaseModel,
+):
     provider: str = Field(
         default="qwen",
         min_length=1,
@@ -33,14 +32,29 @@ class PromptTestSuiteRunRequest(BaseModel):
         le=2.0,
     )
 
-    max_output_tokens: int | None = Field(
-        default=None,
-        ge=1,
-        le=32768,
+    max_output_tokens: int | None = (
+        Field(
+            default=None,
+            ge=1,
+            le=32768,
+        )
     )
 
 
-class PromptTestCaseResultResponse(BaseModel):
+class PromptVersionReference(
+    BaseModel,
+):
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
+    id: int
+    version: int
+
+
+class PromptTestCaseResultResponse(
+    BaseModel,
+):
     model_config = ConfigDict(
         from_attributes=True,
     )
@@ -61,13 +75,21 @@ class PromptTestCaseResultResponse(BaseModel):
     ]
 
 
-class PromptTestSuiteRunResponse(BaseModel):
+class PromptTestSuiteRunResponse(
+    BaseModel,
+):
     model_config = ConfigDict(
         from_attributes=True,
     )
 
     id: int
     prompt_id: int
+
+    prompt_version_id: int | None
+
+    prompt_version: (
+        PromptVersionReference | None
+    )
 
     provider: str
     model: str

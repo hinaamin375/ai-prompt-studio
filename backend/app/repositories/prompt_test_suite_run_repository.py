@@ -15,11 +15,15 @@ class PromptTestSuiteRunRepository:
         db: Session,
         suite_run: PromptTestSuiteRun,
     ) -> PromptTestSuiteRun:
-        db.add(suite_run)
+        db.add(
+            suite_run,
+        )
 
         db.commit()
 
-        db.refresh(suite_run)
+        db.refresh(
+            suite_run,
+        )
 
         return suite_run
 
@@ -29,19 +33,31 @@ class PromptTestSuiteRunRepository:
         prompt_id: int,
     ) -> list[PromptTestSuiteRun]:
         statement = (
-            select(PromptTestSuiteRun)
+            select(
+                PromptTestSuiteRun,
+            )
             .options(
                 selectinload(
-                    PromptTestSuiteRun.results,
+                    PromptTestSuiteRun
+                    .results,
+                ),
+                selectinload(
+                    PromptTestSuiteRun
+                    .prompt_version,
                 ),
             )
             .where(
-                PromptTestSuiteRun.prompt_id
+                PromptTestSuiteRun
+                .prompt_id
                 == prompt_id,
             )
             .order_by(
-                PromptTestSuiteRun.created_at.desc(),
-                PromptTestSuiteRun.id.desc(),
+                PromptTestSuiteRun
+                .created_at
+                .desc(),
+                PromptTestSuiteRun
+                .id
+                .desc(),
             )
         )
 
@@ -58,21 +74,31 @@ class PromptTestSuiteRunRepository:
         suite_run_id: int,
     ) -> PromptTestSuiteRun | None:
         statement = (
-            select(PromptTestSuiteRun)
+            select(
+                PromptTestSuiteRun,
+            )
             .options(
                 selectinload(
-                    PromptTestSuiteRun.results,
+                    PromptTestSuiteRun
+                    .results,
+                ),
+                selectinload(
+                    PromptTestSuiteRun
+                    .prompt_version,
                 ),
             )
             .where(
                 PromptTestSuiteRun.id
                 == suite_run_id,
-                PromptTestSuiteRun.prompt_id
+                PromptTestSuiteRun
+                .prompt_id
                 == prompt_id,
             )
         )
 
-        return db.scalar(statement)
+        return db.scalar(
+            statement,
+        )
 
 
 prompt_test_suite_run_repository = (

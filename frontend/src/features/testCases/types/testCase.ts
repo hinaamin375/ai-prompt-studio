@@ -66,12 +66,20 @@ export interface PromptTestCaseRunResponse {
 
   run: PromptRunResponse;
 }
+
+
 export interface PromptTestSuiteRunRequest {
   provider: string;
   model?: string | null;
 
   temperature?: number | null;
   max_output_tokens?: number | null;
+}
+
+
+export interface PromptVersionReference {
+  id: number;
+  version: number;
 }
 
 
@@ -94,6 +102,12 @@ export interface PromptTestCaseResultResponse {
 export interface PromptTestSuiteRunResponse {
   id: number;
   prompt_id: number;
+
+  prompt_version_id: number | null;
+
+  prompt_version:
+    | PromptVersionReference
+    | null;
 
   provider: string;
   model: string;

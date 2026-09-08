@@ -5029,16 +5029,37 @@ box-shadow:
 
   border-top: 1px solid #e4e8ef;
 }
+/* ============================================
+   Regression History
+   ============================================ */
+
 .regression-history {
   margin-top: 2rem;
 }
 
 .regression-history-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+
   margin-bottom: 1rem;
 }
 
-.regression-history-heading h2 {
-  margin-bottom: 0.35rem;
+.regression-history-heading h3 {
+  margin: 0.25rem 0 0.35rem;
+}
+
+.regression-history-heading p {
+  margin-bottom: 0;
+}
+
+.regression-history-count {
+  flex-shrink: 0;
+
+  color: #667085;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .regression-history-list {
@@ -5048,7 +5069,7 @@ box-shadow:
 }
 
 .regression-history-card {
-  padding: 1.25rem;
+  overflow: hidden;
 
   background: #ffffff;
   border: 1px solid #dfe4ee;
@@ -5057,67 +5078,329 @@ box-shadow:
 
 .regression-history-card-heading {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
   align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+
+  padding: 1.25rem;
 }
 
 .regression-history-card-heading > div {
+  min-width: 0;
+}
+
+.regression-history-version-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+
+  margin-bottom: 0.5rem;
 }
 
-.regression-history-card-heading span {
-  color: #667085;
-  font-size: 0.85rem;
+.regression-history-version-row > strong {
+  color: #101828;
+  font-size: 1rem;
 }
 
-.regression-history-status {
-  margin: 0.75rem 0;
+.regression-status-passed,
+.regression-status-failed {
+  display: inline-flex;
+  align-items: center;
+
+  width: fit-content;
+
+  padding: 0.25rem 0.55rem;
+
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .regression-status-passed {
-  color: #157347;
+  color: #067647;
+  background: #ecfdf3;
 }
 
 .regression-status-failed {
   color: #b42318;
+  background: #fef3f2;
 }
 
-.regression-result-list {
+.regression-history-provider {
   display: flex;
-  flex-direction: column;
-
-  margin-top: 1rem;
-
-  border-top: 1px solid #e4e8ef;
-}
-
-.regression-result-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-
-  padding: 0.75rem 0;
-
-  border-bottom: 1px solid #e4e8ef;
-}
-
-.regression-result-row span {
-  color: #667085;
-  font-size: 0.85rem;
-}
-
-.regression-history-settings {
-  display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.45rem;
+}
 
-  margin-top: 1rem;
+.regression-history-provider strong {
+  color: #344054;
+  font-size: 0.875rem;
+}
+
+.regression-history-provider span {
+  color: #667085;
+  font-size: 0.825rem;
+}
+
+.regression-history-date {
+  flex-shrink: 0;
 
   color: #667085;
   font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+
+/* Summary statistics */
+
+.regression-history-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  border-top: 1px solid #eaecf0;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.regression-history-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  min-width: 0;
+  padding: 1rem 1.25rem;
+
+  border-right: 1px solid #eaecf0;
+}
+
+.regression-history-stat:last-child {
+  border-right: 0;
+}
+
+.regression-history-stat > span {
+  color: #667085;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.regression-history-stat > strong {
+  color: #101828;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+.regression-history-stat > small {
+  color: #98a2b3;
+  font-size: 0.75rem;
+}
+
+
+/* Execution settings */
+
+.regression-history-settings {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  padding: 0.9rem 1.25rem;
+
+  background: #f9fafb;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.regression-history-settings > div {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.regression-history-settings span {
+  color: #667085;
+  font-size: 0.75rem;
+}
+
+.regression-history-settings strong {
+  color: #344054;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+
+/* Individual test results */
+
+.regression-history-results {
+  padding: 1.25rem;
+}
+
+.regression-history-results h4 {
+  margin: 0 0 0.75rem;
+
+  color: #101828;
+  font-size: 0.9rem;
+}
+
+.regression-history-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 0.85rem 0;
+
+  border-bottom: 1px solid #eaecf0;
+}
+
+.regression-history-result:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.regression-history-result-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  min-width: 0;
+}
+
+.regression-history-result-main > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  min-width: 0;
+}
+
+.regression-history-result-main strong {
+  color: #101828;
+  font-size: 0.875rem;
+}
+
+.regression-history-result-main span {
+  color: #667085;
+  font-size: 0.8rem;
+}
+
+.regression-result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  width: 1.75rem;
+  height: 1.75rem;
+
+  border-radius: 50%;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.regression-result-icon-passed {
+  color: #067647;
+  background: #ecfdf3;
+}
+
+.regression-result-icon-failed {
+  color: #b42318;
+  background: #fef3f2;
+}
+
+
+/* Empty state */
+
+.regression-history-empty {
+  padding: 1.5rem;
+
+  background: #ffffff;
+  border: 1px dashed #d0d5dd;
+  border-radius: 12px;
+
+  text-align: center;
+}
+
+.regression-history-empty strong {
+  display: block;
+
+  margin-bottom: 0.35rem;
+
+  color: #101828;
+}
+
+.regression-history-empty p {
+  margin: 0;
+
+  color: #667085;
+  font-size: 0.875rem;
+}
+
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .regression-history-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .regression-history-stat:nth-child(2) {
+    border-right: 0;
+  }
+
+  .regression-history-stat:nth-child(-n + 2) {
+    border-bottom: 1px solid #eaecf0;
+  }
+}
+
+@media (max-width: 700px) {
+  .regression-history-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .regression-history-card-heading {
+    flex-direction: column;
+  }
+
+  .regression-history-date {
+    white-space: normal;
+  }
+
+  .regression-history-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .regression-history-stat {
+    border-right: 0;
+    border-bottom: 1px solid #eaecf0;
+  }
+
+  .regression-history-stat:nth-child(2) {
+    border-right: 0;
+  }
+
+  .regression-history-stat:nth-child(-n + 2) {
+    border-bottom: 1px solid #eaecf0;
+  }
+
+  .regression-history-stat:last-child {
+    border-bottom: 0;
+  }
+
+  .regression-history-settings {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .regression-history-result {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 700px) {

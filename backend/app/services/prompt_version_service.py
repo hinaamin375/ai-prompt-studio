@@ -61,6 +61,52 @@ class PromptVersionService:
             db,
             prompt,
         )
+    def ensure_current_version(
+    self,
+    db: Session,
+    prompt: Prompt,
+    ) -> PromptVersion:
+        """
+        Return the version snapshot representing the
+        prompt's current versioned content.
+
+        If the latest snapshot already matches the
+        current prompt, reuse it. Otherwise create a
+        new snapshot.
+        """
+        latest = (
+        prompt_version_repository
+        .get_latest_for_prompt(
+            db,
+            prompt.id,
+        )
+        )
+
+        versioned_fields = (
+        "title",
+        "description",
+        "system_prompt",
+        "user_prompt",
+        )
+
+        if latest is not None:
+            matches_current = all(
+            getattr(latest, field)
+            == getattr(prompt, field)
+            for field in versioned_fields
+            )
+
+            if matches_current:
+                return latest
+
+        version = self.create_snapshot(
+        db,
+        prompt,
+        )
+
+        db.flush()
+
+        return version
 
     def list_versions(
         self,
@@ -134,10 +180,10 @@ class PromptVersionService:
 
         # Preserve the current state before restoring
         # an older version.
-        self.create_snapshot(
-            db,
-            prompt,
-        )
+        self.ensure_current_version(
+    db,
+    prompt,
+)
 
         for field in fields:
             setattr(

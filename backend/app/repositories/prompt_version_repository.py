@@ -76,6 +76,24 @@ class PromptVersionRepository:
                 statement,
             ).all(),
         )
+    def get_latest_for_prompt(
+    self,
+    db: Session,
+    prompt_id: int,
+) -> PromptVersion | None:
+        statement = (
+         select(PromptVersion)
+            .where(
+            PromptVersion.prompt_id
+            == prompt_id,
+         )
+         .order_by(
+            PromptVersion.version.desc(),
+            )
+         .limit(1)
+        )
+
+        return db.scalar(statement)
 
     def get_by_version(
         self,

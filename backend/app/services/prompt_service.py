@@ -21,6 +21,7 @@ from app.services.prompt_version_service import (
 )
 
 
+
 VERSIONED_FIELDS = {
     "title",
     "description",
@@ -254,10 +255,10 @@ class PromptService:
         )
 
         if has_versioned_changes:
-            prompt_version_service.create_snapshot(
-                db,
-                prompt,
-            )
+              prompt_version_service.ensure_current_version(
+              db,
+              prompt,
+        )
 
         for field, value in update_data.items():
             setattr(
