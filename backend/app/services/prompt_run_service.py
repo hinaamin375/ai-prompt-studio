@@ -10,17 +10,13 @@ from app.core.exceptions import (
     ProviderNotConfiguredError,
     UnsupportedProviderError,
 )
-from app.engine import (
-    PromptParser,
-    PromptRenderer,
-)
+from app.engine import PromptParser, PromptRenderer
 from app.mappers import PromptMapper
 from app.models.prompt_run import PromptRun
 from app.providers import (
     ProviderExecutionSettings,
     ProviderMessage,
     ProviderRegistry,
-    build_provider_registry,
 )
 from app.repositories.prompt_run_repository import (
     prompt_run_repository,
@@ -30,8 +26,9 @@ from app.schemas.prompt_run import (
     PromptRunResponse,
     PromptRunUsage,
 )
-from app.services.prompt_service import (
-    prompt_service,
+from app.services.prompt_service import prompt_service
+from app.services.provider_connection_service import (
+    provider_connection_service,
 )
 
 
@@ -41,10 +38,33 @@ class PromptRunService:
         *,
         registry: ProviderRegistry | None = None,
     ) -> None:
-        self._registry = registry or build_provider_registry()
-
+        # A registry can still be injected by unit tests.
+        # Production execution resolves the provider from the
+        # current workspace's encrypted BYOK connection.
+        self._registry = registry
         self._renderer = PromptRenderer()
         self._parser = PromptParser()
+
+    def _resolve_provider(
+        self,
+        db: Session,
+        provider_id: str,
+    ):
+        if self._registry is not None:
+            if not self._registry.is_known(provider_id):
+                raise UnsupportedProviderError(provider_id)
+
+            provider = self._registry.get(provider_id)
+
+            if provider is None:
+                raise ProviderNotConfiguredError(provider_id)
+
+            return provider
+
+        return provider_connection_service.build_provider(
+            db,
+            provider_id,
+        )
 
     def run_prompt(
         self,
@@ -58,17 +78,12 @@ class PromptRunService:
         )
 
         provider_id = data.provider.strip().lower()
-
-        if not self._registry.is_known(provider_id):
-            raise UnsupportedProviderError(provider_id)
-
-        provider = self._registry.get(provider_id)
-
-        if provider is None:
-            raise ProviderNotConfiguredError(provider_id)
+        provider = self._resolve_provider(
+            db,
+            provider_id,
+        )
 
         document = PromptMapper.to_document(prompt)
-
         rendered_document = self._renderer.render(
             document,
             data.variables,
@@ -77,7 +92,6 @@ class PromptRunService:
         remaining_variables = self._parser.parse(
             rendered_document,
         )
-
         missing_names = list(
             dict.fromkeys(
                 occurrence.name
@@ -115,7 +129,7 @@ class PromptRunService:
             raise PromptRunError() from exc
 
         duration_ms = round(
-            (perf_counter() - started_at) * 1000
+            (perf_counter() - started_at) * 1000,
         )
 
         prompt_run = PromptRun(
@@ -132,25 +146,23 @@ class PromptRunService:
             total_tokens=result.usage.total_tokens,
         )
 
-        saved_prompt_run = (
-    prompt_run_repository.create(
-        db,
-        prompt_run,
-    )
-)
+        prompt_run_repository.create(
+            db,
+            prompt_run,
+        )
 
         return PromptRunResponse(
-    id=saved_prompt_run.id,
-    provider=result.provider,
-    model=result.model,
-    output_text=result.output_text,
-    duration_ms=duration_ms,
-    usage=PromptRunUsage(
-        input_tokens=result.usage.input_tokens,
-        output_tokens=result.usage.output_tokens,
-        total_tokens=result.usage.total_tokens,
-    ),
-)
+            id=prompt_run.id,
+            provider=result.provider,
+            model=result.model,
+            output_text=result.output_text,
+            duration_ms=duration_ms,
+            usage=PromptRunUsage(
+                input_tokens=result.usage.input_tokens,
+                output_tokens=result.usage.output_tokens,
+                total_tokens=result.usage.total_tokens,
+            ),
+        )
 
 
 prompt_run_service = PromptRunService()

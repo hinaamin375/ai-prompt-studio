@@ -323,10 +323,10 @@ function NewUserOverview() {
 
           <div className="new-user-actions">
             <Link
-              to="/prompts/new"
+              to="/providers"
               className="new-user-primary-action"
             >
-              Create Your First Prompt
+              Connect a Model Provider
               <span aria-hidden="true">→</span>
             </Link>
 
@@ -650,7 +650,7 @@ function PopulatedOverview({
         </Link>
 
         <Link
-          to="/settings"
+          to="/providers"
           className="populated-stat-card populated-stat-card--cream"
         >
           <span className="populated-stat-icon">
@@ -661,7 +661,7 @@ function PopulatedOverview({
             <strong>
               {providerQuery.isPending
                 ? "—"
-                : `${providerQuery.data?.length ?? 0} available`}
+                : `${providerQuery.data?.length ?? 0} connected`}
             </strong>
             <small>
               {providerQuery.data?.length
@@ -669,7 +669,7 @@ function PopulatedOverview({
                     .slice(0, 3)
                     .map((provider) => provider.name)
                     .join(" · ")
-                : "Provider setup"}
+                : "Connect a provider"}
             </small>
           </div>
           <span className="populated-stat-orbs" aria-hidden="true">

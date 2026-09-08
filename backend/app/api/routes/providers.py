@@ -1,10 +1,12 @@
-from fastapi import APIRouter
+from typing import Annotated
 
-from app.providers import (
-    build_provider_registry,
-)
-from app.schemas.provider import (
-    ProviderResponse,
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
+from app.schemas.provider import ProviderResponse
+from app.services.provider_connection_service import (
+    provider_connection_service,
 )
 
 
@@ -13,22 +15,25 @@ router = APIRouter(
     tags=["Providers"],
 )
 
+DatabaseSession = Annotated[
+    Session,
+    Depends(get_db),
+]
+
 
 @router.get(
     "",
     response_model=list[ProviderResponse],
 )
-def list_providers() -> list[ProviderResponse]:
-    registry = build_provider_registry()
-
+def list_providers(
+    db: DatabaseSession,
+) -> list[ProviderResponse]:
     return [
         ProviderResponse(
-            id=provider.provider_id,
-            name=provider.display_name,
-            default_model=provider.default_model,
-            models=[
-                provider.default_model,
-            ],
+            id=connection.provider,
+            name=connection.name,
+            default_model=connection.default_model,
+            models=connection.models,
         )
-        for provider in registry.configured_providers()
+        for connection in provider_connection_service.list_connected_providers(db)
     ]

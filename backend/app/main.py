@@ -11,6 +11,7 @@ from app.api.routes import (
     comparisons_router,
     health_router,
     prompts_router,
+    provider_connections_router,
     providers_router,
     tags_router,
 )
@@ -101,10 +102,17 @@ app.include_router(
     prompts_router,
     prefix=settings.api_v1_prefix,
 )
+
 app.include_router(
     providers_router,
     prefix=settings.api_v1_prefix,
 )
+
+app.include_router(
+    provider_connections_router,
+    prefix=settings.api_v1_prefix,
+)
+
 app.include_router(
     comparisons_router,
     prefix=settings.api_v1_prefix,

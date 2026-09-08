@@ -192,7 +192,7 @@ export function AppLayout({
               </span>
 
               <NavLink
-                to="/settings"
+                to="/providers"
                 className="product-nav-secondary-link"
               >
                 <NavigationIcon name="providers" />

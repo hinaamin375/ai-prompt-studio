@@ -40,6 +40,10 @@ import {
   SettingsPage,
 } from "../pages/SettingsPage";
 
+import {
+  ModelProvidersPage,
+} from "../pages/ModelProvidersPage";
+
 
 export function AppRoutes() {
   return (
@@ -77,6 +81,11 @@ export function AppRoutes() {
         <Route
           path="/comparisons"
           element={<ComparisonsPage />}
+        />
+
+        <Route
+          path="/providers"
+          element={<ModelProvidersPage />}
         />
 
         <Route

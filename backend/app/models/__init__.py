@@ -9,6 +9,7 @@ from app.models.prompt_test_suite_run import (
     PromptTestSuiteRun,
 )
 from app.models.prompt_version import PromptVersion
+from app.models.provider_connection import ProviderConnection
 from app.models.system import SystemRecord
 from app.models.tag import Tag, prompt_tags
 
@@ -21,6 +22,7 @@ __all__ = [
     "PromptTestCaseResult",
     "PromptTestSuiteRun",
     "PromptVersion",
+    "ProviderConnection",
     "SystemRecord",
     "Tag",
     "prompt_tags",

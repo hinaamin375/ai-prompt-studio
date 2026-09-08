@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import SecretStr
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
@@ -19,12 +20,20 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./prompt_studio.db"
 
     # -------------------------------------------------
+    # Credential encryption
+    # -------------------------------------------------
+
+    credential_encryption_key: SecretStr | None = None
+
+    # -------------------------------------------------
     # Qwen / Alibaba Model Studio
     # -------------------------------------------------
 
     qwen_api_key: str | None = None
 
-    qwen_base_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    qwen_base_url: str = (
+        "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    )
 
     qwen_default_model: str = "qwen3.6-plus"
 
@@ -34,7 +43,9 @@ class Settings(BaseSettings):
 
     gemini_api_key: str | None = None
 
-    gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta"
+    gemini_base_url: str = (
+        "https://generativelanguage.googleapis.com/v1beta"
+    )
 
     gemini_default_model: str = "gemini-3.1-flash-lite"
 
