@@ -10,6 +10,7 @@ import { EditPromptPage } from "../pages/EditPromptPage";
 import { ModelProvidersPage } from "../pages/ModelProvidersPage";
 import { NewPromptPage } from "../pages/NewPromptPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+import { OnboardingPage } from "../pages/OnboardingPage";
 import { PlaygroundPage } from "../pages/PlaygroundPage";
 import { PromptsPage } from "../pages/PromptsPage";
 import { SettingsPage } from "../pages/SettingsPage";
@@ -35,6 +36,7 @@ export function AppRoutes() {
     <AppLayout>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/prompts" element={<PromptsPage />} />
         <Route path="/prompts/new" element={<NewPromptPage />} />
         <Route path="/prompts/:promptId/edit" element={<EditPromptPage />} />

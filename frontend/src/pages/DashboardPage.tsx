@@ -323,10 +323,10 @@ function NewUserOverview() {
 
           <div className="new-user-actions">
             <Link
-              to="/providers"
+              to="/onboarding"
               className="new-user-primary-action"
             >
-              Connect a Model Provider
+              Start Guided Setup
               <span aria-hidden="true">→</span>
             </Link>
 

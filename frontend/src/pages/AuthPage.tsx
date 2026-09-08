@@ -4,6 +4,7 @@ import {
 } from "react";
 
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../features/auth";
 
@@ -22,6 +23,7 @@ function errorMessage(error: unknown): string {
 
 export function AuthPage() {
   const { login, register } = useAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("register");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -41,6 +43,7 @@ export function AuthPage() {
           email: email.trim(),
           password,
         });
+        navigate("/onboarding", { replace: true });
       } else {
         await login({ email: email.trim(), password });
       }
@@ -118,7 +121,7 @@ export function AuthPage() {
             </h2>
             <p>
               {mode === "register"
-                ? "Your existing local BYOK connections will be moved into your first personal workspace."
+                ? "Your private workspace is created automatically. We’ll guide you through connecting a model and running your first prompt."
                 : "Continue where you left off."}
             </p>
           </header>
