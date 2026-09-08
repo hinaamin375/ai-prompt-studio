@@ -154,7 +154,9 @@ export function PromptLibrary({
 
 
   const [searchTerm, setSearchTerm] =
-    useState("");
+    useState(
+      searchParams.get("search") ?? "",
+    );
 
   const [sortOption, setSortOption] =
     useState<PromptSortOption>(
