@@ -8,6 +8,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_current_session
 from app.db.session import get_db
 from app.schemas.tag import (
     TagCreate,
@@ -22,6 +23,7 @@ from app.services.tag_service import (
 router = APIRouter(
     prefix="/tags",
     tags=["Tags"],
+    dependencies=[Depends(get_current_session)],
 )
 
 

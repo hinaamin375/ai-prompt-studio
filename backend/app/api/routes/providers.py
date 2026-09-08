@@ -1,33 +1,19 @@
-from typing import Annotated
+from fastapi import APIRouter
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
-from app.db.session import get_db
+from app.api.dependencies import CurrentSession, DatabaseSession
 from app.schemas.provider import ProviderResponse
-from app.services.provider_connection_service import (
-    provider_connection_service,
-)
+from app.services.provider_connection_service import provider_connection_service
 
 
-router = APIRouter(
-    prefix="/providers",
-    tags=["Providers"],
-)
-
-DatabaseSession = Annotated[
-    Session,
-    Depends(get_db),
-]
+router = APIRouter(prefix="/providers", tags=["Providers"])
 
 
-@router.get(
-    "",
-    response_model=list[ProviderResponse],
-)
+@router.get("", response_model=list[ProviderResponse])
 def list_providers(
+    authenticated: CurrentSession,
     db: DatabaseSession,
 ) -> list[ProviderResponse]:
+    del authenticated
     return [
         ProviderResponse(
             id=connection.provider,

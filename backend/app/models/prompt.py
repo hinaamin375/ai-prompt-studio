@@ -7,6 +7,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Index,
     String,
     Text,
     func,
@@ -34,9 +35,21 @@ if TYPE_CHECKING:
 class Prompt(Base):
     __tablename__ = "prompts"
 
+    __table_args__ = (
+        Index("ix_prompts_workspace_id", "workspace_id"),
+    )
+
     id: Mapped[int] = mapped_column(
         primary_key=True,
         index=True,
+    )
+
+    workspace_id: Mapped[int | None] = mapped_column(
+        ForeignKey(
+            "workspaces.id",
+            ondelete="CASCADE",
+        ),
+        nullable=True,
     )
 
     title: Mapped[str] = mapped_column(

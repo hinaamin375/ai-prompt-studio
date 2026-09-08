@@ -1,27 +1,16 @@
-from .collections import (
-    router as collections_router,
-)
-from .comparisons import (
-    router as comparisons_router,
-)
-from .health import (
-    router as health_router,
-)
-from .prompts import (
-    router as prompts_router,
-)
-from .provider_connections import (
-    router as provider_connections_router,
-)
-from .providers import (
-    router as providers_router,
-)
-from .tags import (
-    router as tags_router,
-)
+from .auth import router as auth_router
+from .collections import router as collections_router
+from .comparisons import router as comparisons_router
+from .health import router as health_router
+from .prompts import router as prompts_router
+from .provider_connections import router as provider_connections_router
+from .providers import router as providers_router
+from .tags import router as tags_router
+from .workspaces import router as workspaces_router
 
 
 __all__ = [
+    "auth_router",
     "collections_router",
     "comparisons_router",
     "health_router",
@@ -29,4 +18,5 @@ __all__ = [
     "provider_connections_router",
     "providers_router",
     "tags_router",
+    "workspaces_router",
 ]

@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.api.routes import (
+    auth_router,
     collections_router,
     comparisons_router,
     health_router,
@@ -14,6 +15,7 @@ from app.api.routes import (
     provider_connections_router,
     providers_router,
     tags_router,
+    workspaces_router,
 )
 from app.core.config import settings
 from app.core.exceptions import ApplicationError
@@ -22,40 +24,23 @@ from app.db.session import engine
 
 
 configure_logging()
-
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     del app
-
-    logger.info(
-        "Starting %s",
-        settings.app_name,
-    )
-
+    logger.info("Starting %s", settings.app_name)
     with engine.connect() as connection:
-        connection.execute(
-            text("SELECT 1"),
-        )
-
-    logger.info(
-        "Database connection verified",
-    )
-
+        connection.execute(text("SELECT 1"))
+    logger.info("Database connection verified")
     yield
-
-    logger.info(
-        "Stopping %s",
-        settings.app_name,
-    )
+    logger.info("Stopping %s", settings.app_name)
 
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    debug=settings.debug,
     lifespan=lifespan,
 )
 
@@ -70,69 +55,40 @@ async def application_error_handler(
         request.url.path,
         exc.message,
     )
-
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": {
                 "code": exc.code,
                 "message": exc.message,
-            },
+            }
         },
     )
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        settings.frontend_url,
-    ],
+    allow_origins=[settings.frontend_url],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-app.include_router(
-    health_router,
-    prefix=settings.api_v1_prefix,
-)
-
-app.include_router(
-    prompts_router,
-    prefix=settings.api_v1_prefix,
-)
-
-app.include_router(
-    providers_router,
-    prefix=settings.api_v1_prefix,
-)
-
+app.include_router(health_router, prefix=settings.api_v1_prefix)
+app.include_router(auth_router, prefix=settings.api_v1_prefix)
+app.include_router(workspaces_router, prefix=settings.api_v1_prefix)
+app.include_router(prompts_router, prefix=settings.api_v1_prefix)
+app.include_router(providers_router, prefix=settings.api_v1_prefix)
 app.include_router(
     provider_connections_router,
     prefix=settings.api_v1_prefix,
 )
-
-app.include_router(
-    comparisons_router,
-    prefix=settings.api_v1_prefix,
-)
-
-app.include_router(
-    collections_router,
-    prefix=settings.api_v1_prefix,
-)
-
-app.include_router(
-    tags_router,
-    prefix=settings.api_v1_prefix,
-)
+app.include_router(comparisons_router, prefix=settings.api_v1_prefix)
+app.include_router(collections_router, prefix=settings.api_v1_prefix)
+app.include_router(tags_router, prefix=settings.api_v1_prefix)
 
 
-@app.get(
-    "/",
-    tags=["Root"],
-)
+@app.get("/", tags=["Root"])
 async def root() -> dict[str, str]:
     return {
         "name": settings.app_name,

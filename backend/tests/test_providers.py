@@ -1,18 +1,23 @@
 from fastapi.testclient import TestClient
 
+from app.api.dependencies import get_current_session
 from app.main import app
 
 
 client = TestClient(app)
 
 
-def test_list_providers_returns_only_connected_providers() -> None:
-    response = client.get(
-        "/api/v1/providers",
+def test_list_providers_requires_authentication() -> None:
+    test_override = app.dependency_overrides.pop(
+        get_current_session,
+        None,
     )
 
-    assert response.status_code == 200
+    try:
+        response = client.get("/api/v1/providers")
+    finally:
+        if test_override is not None:
+            app.dependency_overrides[get_current_session] = test_override
 
-    providers = response.json()
-
-    assert providers == []
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "authentication_required"

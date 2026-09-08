@@ -14,6 +14,7 @@ from app.schemas.prompt_run import (
 from app.services.prompt_run_service import (
     prompt_run_service,
 )
+from app.api.dependencies import get_current_session
 from app.db.session import get_db
 from app.schemas.analysis import (
     PromptAnalysis,
@@ -73,6 +74,7 @@ from app.services.regression_comparison_service import (
 router = APIRouter(
     prefix="/prompts",
     tags=["Prompts"],
+    dependencies=[Depends(get_current_session)],
 )
 
 

@@ -3,7 +3,9 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
+
 import { NotificationProvider } from "../components/notifications/NotificationProvider";
+import { AuthProvider } from "../features/auth";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,7 +20,7 @@ const queryClient = new QueryClient({
 export function AppProviders({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <AuthProvider>{children}</AuthProvider>
       <NotificationProvider />
     </QueryClientProvider>
   );

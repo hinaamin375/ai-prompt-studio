@@ -5,6 +5,7 @@ Prompt comparison endpoints.
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_current_session
 from app.db.session import get_db
 from app.schemas.comparison import (
     PromptComparisonRequest,
@@ -17,6 +18,7 @@ from app.services.comparison_service import (
 router = APIRouter(
     prefix="/comparisons",
     tags=["comparisons"],
+    dependencies=[Depends(get_current_session)],
 )
 
 

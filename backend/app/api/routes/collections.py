@@ -8,6 +8,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_current_session
 from app.db.session import get_db
 from app.schemas.collection import (
     CollectionCreate,
@@ -22,6 +23,7 @@ from app.services.collection_service import (
 router = APIRouter(
     prefix="/collections",
     tags=["Collections"],
+    dependencies=[Depends(get_current_session)],
 )
 
 

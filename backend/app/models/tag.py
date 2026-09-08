@@ -7,6 +7,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Index,
     String,
     Table,
     func,
@@ -49,15 +50,32 @@ prompt_tags = Table(
 class Tag(Base):
     __tablename__ = "tags"
 
+    __table_args__ = (
+        Index(
+            "ux_tags_workspace_name",
+            "workspace_id",
+            "name",
+            unique=True,
+        ),
+        Index("ix_tags_workspace_id", "workspace_id"),
+    )
+
     id: Mapped[int] = mapped_column(
         primary_key=True,
         index=True,
     )
 
+    workspace_id: Mapped[int | None] = mapped_column(
+        ForeignKey(
+            "workspaces.id",
+            ondelete="CASCADE",
+        ),
+        nullable=True,
+    )
+
     name: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        unique=True,
         index=True,
     )
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import DateTime, ForeignKey, Index, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -15,15 +15,32 @@ if TYPE_CHECKING:
 class Collection(Base):
     __tablename__ = "collections"
 
+    __table_args__ = (
+        Index(
+            "ux_collections_workspace_name",
+            "workspace_id",
+            "name",
+            unique=True,
+        ),
+        Index("ix_collections_workspace_id", "workspace_id"),
+    )
+
     id: Mapped[int] = mapped_column(
         primary_key=True,
         index=True,
     )
 
+    workspace_id: Mapped[int | None] = mapped_column(
+        ForeignKey(
+            "workspaces.id",
+            ondelete="CASCADE",
+        ),
+        nullable=True,
+    )
+
     name: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
-        unique=True,
         index=True,
     )
 

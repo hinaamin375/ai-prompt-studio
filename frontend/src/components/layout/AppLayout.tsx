@@ -9,6 +9,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import { useAuth } from "../../features/auth";
+
 
 type IconName =
   | "overview"
@@ -110,7 +112,17 @@ export function AppLayout({
   children,
 }: PropsWithChildren) {
   const navigate = useNavigate();
+  const { session, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+
+  const displayName = session?.user.full_name ?? "Prompt Studio User";
+  const workspaceName = session?.workspace.name ?? "Workspace";
+  const initials = displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "PS";
 
   function handleSearchSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -214,12 +226,22 @@ export function AppLayout({
           </div>
 
           <div className="product-workspace-user">
-            <span className="product-avatar">HA</span>
+            <span className="product-avatar">{initials}</span>
 
             <div>
-              <strong>Hina Amin</strong>
-              <span>Personal Workspace</span>
+              <strong>{displayName}</strong>
+              <span>{workspaceName}</span>
             </div>
+
+            <button
+              type="button"
+              className="product-signout-button"
+              onClick={() => void logout()}
+              title="Sign out"
+              aria-label="Sign out"
+            >
+              ↗
+            </button>
           </div>
         </div>
       </aside>
@@ -247,7 +269,12 @@ export function AppLayout({
           </form>
 
           <div className="product-topbar-account">
-            <span className="product-topbar-avatar">HA</span>
+            <span
+              className="product-topbar-avatar"
+              title={`${displayName} · ${workspaceName}`}
+            >
+              {initials}
+            </span>
           </div>
         </header>
 

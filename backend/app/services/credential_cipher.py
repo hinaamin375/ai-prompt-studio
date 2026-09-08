@@ -24,26 +24,18 @@ class CredentialCipher:
             )
 
         try:
-            return Fernet(
-                raw_key.encode("utf-8"),
-            )
+            return Fernet(raw_key.encode("utf-8"))
         except (TypeError, ValueError) as exc:
             raise CredentialEncryptionError(
                 "CREDENTIAL_ENCRYPTION_KEY is not a valid Fernet key."
             ) from exc
 
-    def encrypt(
-        self,
-        value: str,
-    ) -> str:
+    def encrypt(self, value: str) -> str:
         return self._fernet().encrypt(
             value.encode("utf-8"),
         ).decode("utf-8")
 
-    def decrypt(
-        self,
-        value: str,
-    ) -> str:
+    def decrypt(self, value: str) -> str:
         try:
             return self._fernet().decrypt(
                 value.encode("utf-8"),

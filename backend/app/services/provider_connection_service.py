@@ -23,6 +23,33 @@ from app.services.credential_cipher import credential_cipher
 
 
 class ProviderConnectionService:
+    def _workspace_id(
+        self,
+        db: Session,
+        provider_id: str | None = None,
+    ) -> int:
+        workspace_id = db.info.get("workspace_id")
+        if isinstance(workspace_id, int):
+            return workspace_id
+
+        # Transitional safety path for existing prompt execution. Old prompt
+        # routes do not yet carry workspace ownership. If exactly one scoped
+        # connection exists for the requested provider, it is unambiguous and
+        # safe to use. As soon as multiple workspaces connect the same provider,
+        # execution fails closed instead of guessing another tenant's key.
+        if provider_id is not None:
+            matches = provider_connection_repository.list_by_provider(
+                db, provider_id
+            )
+            if len(matches) == 1 and matches[0].workspace_id is not None:
+                return matches[0].workspace_id
+
+        raise ApplicationError(
+            "An authenticated workspace is required for provider credentials.",
+            code="workspace_required",
+            status_code=401,
+        )
+
     def _definition(
         self,
         provider_id: str,
@@ -68,9 +95,12 @@ class ProviderConnectionService:
         self,
         db: Session,
     ) -> list[ProviderConnectionResponse]:
+        workspace_id = self._workspace_id(db)
         stored = {
             item.provider: item
-            for item in provider_connection_repository.list_all(db)
+            for item in provider_connection_repository.list_all(
+                db, workspace_id
+            )
         }
 
         return [
@@ -98,13 +128,16 @@ class ProviderConnectionService:
             )
 
         encrypted_api_key = credential_cipher.encrypt(api_key)
+        workspace_id = self._workspace_id(db, definition.provider_id)
         connection = provider_connection_repository.get_by_provider(
             db,
+            workspace_id,
             definition.provider_id,
         )
 
         if connection is None:
             connection = ProviderConnection(
+                workspace_id=workspace_id,
                 provider=definition.provider_id,
                 encrypted_api_key=encrypted_api_key,
                 key_last_four=api_key[-4:],
@@ -126,8 +159,10 @@ class ProviderConnectionService:
         provider_id: str,
     ) -> None:
         definition = self._definition(provider_id)
+        workspace_id = self._workspace_id(db, definition.provider_id)
         connection = provider_connection_repository.get_by_provider(
             db,
+            workspace_id,
             definition.provider_id,
         )
 
@@ -145,8 +180,10 @@ class ProviderConnectionService:
         provider_id: str,
     ) -> ModelProvider:
         definition = self._definition(provider_id)
+        workspace_id = self._workspace_id(db, definition.provider_id)
         connection = provider_connection_repository.get_by_provider(
             db,
+            workspace_id,
             definition.provider_id,
         )
 
@@ -207,8 +244,10 @@ class ProviderConnectionService:
         provider_id: str,
     ) -> ProviderConnectionTestResponse:
         definition = self._definition(provider_id)
+        workspace_id = self._workspace_id(db, definition.provider_id)
         connection = provider_connection_repository.get_by_provider(
             db,
+            workspace_id,
             definition.provider_id,
         )
 
