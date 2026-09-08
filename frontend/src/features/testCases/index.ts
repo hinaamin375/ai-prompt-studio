@@ -11,6 +11,16 @@ export {
 } from "./components/TestCaseRunResult";
 
 export {
+  RegressionHistory,
+} from "./components/RegressionHistory";
+
+export {
+  RegressionComparisonPanel,
+} from "./components/RegressionComparisonPanel";
+
+
+export {
+  comparePromptTestSuiteRuns,
   createPromptTestCase,
   deletePromptTestCase,
   getPromptTestSuiteRun,
@@ -20,6 +30,7 @@ export {
   runPromptTestSuite,
   updatePromptTestCase,
 } from "./api/testCases";
+
 
 export type {
   PromptTestAssertionResult,
@@ -31,7 +42,11 @@ export type {
   PromptTestCaseUpdate,
   PromptTestSuiteRunRequest,
   PromptTestSuiteRunResponse,
+  PromptVersionReference,
+  RegressionAssertionComparisonResponse,
+  RegressionChange,
+  RegressionComparisonOutcome,
+  RegressionComparisonResponse,
+  RegressionSuiteSummaryResponse,
+  RegressionTestComparisonResponse,
 } from "./types/testCase";
-export {
-  RegressionHistory,
-} from "./components/RegressionHistory";

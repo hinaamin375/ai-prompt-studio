@@ -26,6 +26,7 @@ import {
 } from "../../playground/api/providers";
 
 import {
+  comparePromptTestSuiteRuns,
   createPromptTestCase,
   deletePromptTestCase,
   listPromptTestCases,
@@ -51,6 +52,9 @@ import {
   TestCaseRunResult,
 } from "./TestCaseRunResult";
 
+import {
+  RegressionComparisonPanel,
+} from "./RegressionComparisonPanel";
 
 interface PromptTestCasesProps {
   prompt: Prompt;
@@ -143,6 +147,27 @@ const suiteHistoryQuery = useQuery({
       prompt.id,
     ),
 });
+const regressionComparisonMutation =
+  useMutation({
+    mutationFn: ({
+      baselineSuiteId,
+      candidateSuiteId,
+    }: {
+      baselineSuiteId: number;
+      candidateSuiteId: number;
+    }) =>
+      comparePromptTestSuiteRuns(
+        prompt.id,
+        baselineSuiteId,
+        candidateSuiteId,
+      ),
+
+    onError: () => {
+      toast.error(
+        "Could not compare regression suites.",
+      );
+    },
+  });
 
   const providersQuery = useQuery({
     queryKey: ["providers"],
@@ -872,7 +897,7 @@ async function handleRunAll(): Promise<void> {
         </div>
         
       )}
-      <RegressionHistory
+    <RegressionHistory
   runs={
     suiteHistoryQuery.data ?? []
   }
@@ -882,7 +907,29 @@ async function handleRunAll(): Promise<void> {
   isError={
     suiteHistoryQuery.isError
   }
+  onCompare={(
+    baselineSuiteId,
+    candidateSuiteId,
+  ) => {
+    regressionComparisonMutation.mutate({
+      baselineSuiteId,
+      candidateSuiteId,
+    });
+  }}
 />
+
+<RegressionComparisonPanel
+  comparison={
+    regressionComparisonMutation.data
+  }
+  isLoading={
+    regressionComparisonMutation.isPending
+  }
+  isError={
+    regressionComparisonMutation.isError
+  }
+/>
+
     </section>
   );
 }

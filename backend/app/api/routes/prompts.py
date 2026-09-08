@@ -64,7 +64,12 @@ from app.schemas.prompt_test_suite_run import (
 from app.services.prompt_test_suite_run_service import (
     prompt_test_suite_run_service,
 )
-
+from app.schemas.regression_comparison import (
+    RegressionComparisonResponse,
+)
+from app.services.regression_comparison_service import (
+    regression_comparison_service,
+)
 router = APIRouter(
     prefix="/prompts",
     tags=["Prompts"],
@@ -455,5 +460,39 @@ def get_prompt_test_suite_run(
             db=db,
             prompt_id=prompt_id,
             suite_run_id=suite_run_id,
+        )
+    )
+
+@router.get(
+    (
+        "/{prompt_id}/test-suite-runs/"
+        "{before_suite_run_id}/compare/"
+        "{after_suite_run_id}"
+    ),
+    response_model=RegressionComparisonResponse,
+)
+def compare_prompt_test_suite_runs(
+    prompt_id: int,
+    before_suite_run_id: int,
+    after_suite_run_id: int,
+    db: DatabaseSession,
+) -> RegressionComparisonResponse:
+    """
+    Compare two persisted regression suite runs.
+
+    The first suite is treated as the baseline
+    and the second suite as the candidate.
+    """
+    return (
+        regression_comparison_service
+        .compare_suite_runs(
+            db=db,
+            prompt_id=prompt_id,
+            before_suite_run_id=(
+                before_suite_run_id
+            ),
+            after_suite_run_id=(
+                after_suite_run_id
+            ),
         )
     )

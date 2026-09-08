@@ -127,3 +127,88 @@ export interface PromptTestSuiteRunResponse {
 
   results: PromptTestCaseResultResponse[];
 }
+
+
+/*
+ * Regression comparison
+ */
+
+export type RegressionComparisonOutcome =
+  | "improved"
+  | "regressed"
+  | "unchanged"
+  | "mixed";
+
+
+export type RegressionChange =
+  | "improved"
+  | "regressed"
+  | "unchanged"
+  | "added"
+  | "removed";
+
+
+export interface RegressionSuiteSummaryResponse {
+  suite_run_id: number;
+
+  prompt_version_id: number | null;
+  prompt_version_number: number | null;
+
+  provider: string;
+  model: string;
+
+  temperature: number | null;
+  max_output_tokens: number | null;
+
+  total_tests: number;
+  passed_tests: number;
+  failed_tests: number;
+  test_pass_rate: number;
+
+  total_assertions: number;
+  passed_assertions: number;
+  failed_assertions: number;
+  assertion_pass_rate: number;
+}
+
+
+export interface RegressionAssertionComparisonResponse {
+  expected: string;
+
+  passed_before: boolean | null;
+  passed_after: boolean | null;
+
+  change: RegressionChange;
+}
+
+
+export interface RegressionTestComparisonResponse {
+  test_case_id_before: number | null;
+  test_case_id_after: number | null;
+
+  name_before: string | null;
+  name_after: string | null;
+
+  passed_before: boolean | null;
+  passed_after: boolean | null;
+
+  change: RegressionChange;
+
+  assertions:
+    RegressionAssertionComparisonResponse[];
+}
+
+
+export interface RegressionComparisonResponse {
+  outcome: RegressionComparisonOutcome;
+
+  before: RegressionSuiteSummaryResponse;
+  after: RegressionSuiteSummaryResponse;
+
+  test_pass_rate_delta: number;
+  assertion_pass_rate_delta: number;
+
+  settings_changed: boolean;
+
+  tests: RegressionTestComparisonResponse[];
+}

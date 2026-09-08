@@ -10,6 +10,7 @@ import type {
   PromptTestCaseUpdate,
   PromptTestSuiteRunRequest,
   PromptTestSuiteRunResponse,
+  RegressionComparisonResponse,
 } from "../types/testCase";
 
 
@@ -81,6 +82,8 @@ export async function runPromptTestCase(
 
   return response.data;
 }
+
+
 export async function runPromptTestSuite(
   promptId: number,
   data: PromptTestSuiteRunRequest,
@@ -117,6 +120,21 @@ export async function getPromptTestSuiteRun(
     PromptTestSuiteRunResponse
   >(
     `/prompts/${promptId}/test-suite-runs/${suiteRunId}`,
+  );
+
+  return response.data;
+}
+
+
+export async function comparePromptTestSuiteRuns(
+  promptId: number,
+  baselineSuiteId: number,
+  candidateSuiteId: number,
+): Promise<RegressionComparisonResponse> {
+  const response = await apiClient.get<
+    RegressionComparisonResponse
+  >(
+    `/prompts/${promptId}/test-suite-runs/${baselineSuiteId}/compare/${candidateSuiteId}`,
   );
 
   return response.data;

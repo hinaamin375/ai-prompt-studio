@@ -1,3 +1,11 @@
+import {
+  useState,
+} from "react";
+
+import {
+  toast,
+} from "sonner";
+
 import type {
   PromptTestSuiteRunResponse,
 } from "../types/testCase";
@@ -7,6 +15,17 @@ interface RegressionHistoryProps {
   runs: PromptTestSuiteRunResponse[];
   isLoading: boolean;
   isError: boolean;
+
+  onCompare?: (
+    baselineSuiteId: number,
+    candidateSuiteId: number,
+  ) => void;
+}
+
+
+interface SelectedSuites {
+  baselineId: number | null;
+  candidateId: number | null;
 }
 
 
@@ -82,7 +101,185 @@ export function RegressionHistory({
   runs,
   isLoading,
   isError,
+  onCompare,
 }: RegressionHistoryProps) {
+  const [
+    selectedSuites,
+    setSelectedSuites,
+  ] = useState<SelectedSuites>({
+    baselineId: null,
+    candidateId: null,
+  });
+
+
+  const selectedCount = [
+    selectedSuites.baselineId,
+    selectedSuites.candidateId,
+  ].filter(
+    (value) => value !== null,
+  ).length;
+
+
+  function isSelected(
+    suiteId: number,
+  ): boolean {
+    return (
+      selectedSuites.baselineId === suiteId
+      || selectedSuites.candidateId === suiteId
+    );
+  }
+
+
+  function getSelectionRole(
+    suiteId: number,
+  ): "baseline" | "candidate" | null {
+    if (
+      selectedSuites.baselineId === suiteId
+    ) {
+      return "baseline";
+    }
+
+    if (
+      selectedSuites.candidateId === suiteId
+    ) {
+      return "candidate";
+    }
+
+    return null;
+  }
+
+
+  function handleSuiteSelection(
+    suiteId: number,
+  ): void {
+    setSelectedSuites(
+      (current) => {
+        if (
+          current.baselineId === suiteId
+        ) {
+          return {
+            baselineId:
+              current.candidateId,
+            candidateId: null,
+          };
+        }
+
+        if (
+          current.candidateId === suiteId
+        ) {
+          return {
+            ...current,
+            candidateId: null,
+          };
+        }
+
+        if (
+          current.baselineId === null
+        ) {
+          return {
+            ...current,
+            baselineId: suiteId,
+          };
+        }
+
+        if (
+          current.candidateId === null
+        ) {
+          return {
+            ...current,
+            candidateId: suiteId,
+          };
+        }
+
+        toast.info(
+          "You can compare two suites at a time.",
+          {
+            description:
+              "Clear one selection before choosing another suite.",
+          },
+        );
+
+        return current;
+      },
+    );
+  }
+
+
+  function handleClearSelection(): void {
+    setSelectedSuites({
+      baselineId: null,
+      candidateId: null,
+    });
+  }
+
+
+  function handleSwapSelection(): void {
+    setSelectedSuites(
+      (current) => {
+        if (
+          current.baselineId === null
+          || current.candidateId === null
+        ) {
+          return current;
+        }
+
+        return {
+          baselineId:
+            current.candidateId,
+
+          candidateId:
+            current.baselineId,
+        };
+      },
+    );
+  }
+
+
+  function handleCompare(): void {
+    const {
+      baselineId,
+      candidateId,
+    } = selectedSuites;
+
+    if (
+      baselineId === null
+      || candidateId === null
+    ) {
+      toast.info(
+        "Select two regression suites.",
+        {
+          description:
+            "Choose a baseline and a candidate before comparing.",
+        },
+      );
+
+      return;
+    }
+
+    if (!onCompare) {
+      /*
+       * Checkpoint 3 owns suite selection.
+       * Checkpoint 4 will connect this
+       * selection to the comparison panel.
+       */
+      toast.success(
+        "Regression suites selected",
+        {
+          description:
+            `Suite #${baselineId} → Suite #${candidateId}`,
+        },
+      );
+
+      return;
+    }
+
+    onCompare(
+      baselineId,
+      candidateId,
+    );
+  }
+
+
   if (isLoading) {
     return (
       <section className="regression-history">
@@ -170,222 +367,336 @@ export function RegressionHistory({
           </p>
         </div>
       ) : (
-        <div className="regression-history-list">
-          {runs.map((run) => {
-            const suitePassed =
-              run.failed_tests === 0;
+        <>
+          <div className="regression-comparison-toolbar">
+            <div className="regression-comparison-toolbar-copy">
+              <strong>
+                Compare regression suites
+              </strong>
 
-            return (
-              <article
-                key={run.id}
-                className="regression-history-card"
+              <span>
+                Select a baseline first,
+                then select the candidate.
+              </span>
+            </div>
+
+            <div className="regression-comparison-toolbar-actions">
+              <span className="regression-comparison-selection-count">
+                {selectedCount} / 2 selected
+              </span>
+
+              {selectedCount > 0 && (
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={
+                    handleClearSelection
+                  }
+                >
+                  Clear
+                </button>
+              )}
+
+              <button
+                type="button"
+                className="secondary-button"
+                disabled={
+                  selectedCount !== 2
+                }
+                onClick={
+                  handleSwapSelection
+                }
               >
-                <div className="regression-history-card-heading">
-                  <div>
-                    <div className="regression-history-version-row">
-                      <strong>
-                        {formatVersion(run)}
-                      </strong>
+                Swap
+              </button>
 
-                      <span
-                        className={
-                          suitePassed
-                            ? "regression-status-passed"
-                            : "regression-status-failed"
+              <button
+                type="button"
+                className="primary-button"
+                disabled={
+                  selectedCount !== 2
+                }
+                onClick={
+                  handleCompare
+                }
+              >
+                Compare Selected
+              </button>
+            </div>
+          </div>
+
+
+          <div className="regression-history-list">
+            {runs.map((run) => {
+              const suitePassed =
+                run.failed_tests === 0;
+
+              const selectionRole =
+                getSelectionRole(
+                  run.id,
+                );
+
+              const selected =
+                isSelected(
+                  run.id,
+                );
+
+              return (
+                <article
+                  key={run.id}
+                  className={[
+                    "regression-history-card",
+                    selected
+                      ? "regression-history-card-selected"
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <div className="regression-suite-selection">
+                    <label className="regression-suite-selection-control">
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() =>
+                          handleSuiteSelection(
+                            run.id,
+                          )
                         }
-                      >
-                        {suitePassed
-                          ? "Suite Passed"
-                          : "Suite Failed"}
-                      </span>
-                    </div>
-
-                    <div className="regression-history-provider">
-                      <strong>
-                        {formatProvider(
-                          run.provider,
-                        )}
-                      </strong>
+                      />
 
                       <span>
-                        {run.model}
+                        Select for comparison
                       </span>
-                    </div>
-                  </div>
+                    </label>
 
-                  <span className="regression-history-date">
-                    {formatDate(
-                      run.created_at,
-                    )}
-                  </span>
-                </div>
-
-
-                <div className="regression-history-summary">
-                  <div className="regression-history-stat">
-                    <span>
-                      Tests
-                    </span>
-
-                    <strong>
-                      {run.passed_tests}
-                      {" / "}
-                      {run.total_tests}
-                    </strong>
-
-                    <small>
-                      passed
-                    </small>
-                  </div>
-
-                  <div className="regression-history-stat">
-                    <span>
-                      Assertions
-                    </span>
-
-                    <strong>
-                      {run.passed_assertions}
-                      {" / "}
-                      {run.total_assertions}
-                    </strong>
-
-                    <small>
-                      passed
-                    </small>
-                  </div>
-
-                  <div className="regression-history-stat">
-                    <span>
-                      Failed Tests
-                    </span>
-
-                    <strong>
-                      {run.failed_tests}
-                    </strong>
-
-                    <small>
-                      total
-                    </small>
-                  </div>
-
-                  <div className="regression-history-stat">
-                    <span>
-                      Failed Assertions
-                    </span>
-
-                    <strong>
-                      {run.failed_assertions}
-                    </strong>
-
-                    <small>
-                      total
-                    </small>
-                  </div>
-                </div>
-
-
-                <div className="regression-history-settings">
-                  <div>
-                    <span>
-                      Temperature
-                    </span>
-
-                    <strong>
-                      {formatTemperature(
-                        run.temperature,
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Max output tokens
-                    </span>
-
-                    <strong>
-                      {formatMaxTokens(
-                        run.max_output_tokens,
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Suite ID
-                    </span>
-
-                    <strong>
-                      #{run.id}
-                    </strong>
-                  </div>
-                </div>
-
-
-                <div className="regression-history-results">
-                  <h4>
-                    Test Results
-                  </h4>
-
-                  {run.results.map(
-                    (result) => (
-                      <div
-                        key={result.id}
-                        className="regression-history-result"
+                    {selectionRole && (
+                      <span
+                        className={
+                          selectionRole ===
+                          "baseline"
+                            ? "regression-selection-role regression-selection-role-baseline"
+                            : "regression-selection-role regression-selection-role-candidate"
+                        }
                       >
-                        <div className="regression-history-result-main">
-                          <span
-                            className={
-                              result.passed
-                                ? "regression-result-icon regression-result-icon-passed"
-                                : "regression-result-icon regression-result-icon-failed"
-                            }
-                            aria-hidden="true"
-                          >
-                            {result.passed
-                              ? "✓"
-                              : "✕"}
-                          </span>
+                        {selectionRole ===
+                        "baseline"
+                          ? "Baseline"
+                          : "Candidate"}
+                      </span>
+                    )}
+                  </div>
 
-                          <div>
-                            <strong>
-                              {
-                                result.test_case_name
-                              }
-                            </strong>
 
-                            <span>
-                              {
-                                result.passed_count
-                              }
-                              {" / "}
-                              {
-                                result.passed_count
-                                + result.failed_count
-                              }
-                              {" assertions passed"}
-                            </span>
-                          </div>
-                        </div>
+                  <div className="regression-history-card-heading">
+                    <div>
+                      <div className="regression-history-version-row">
+                        <strong>
+                          {formatVersion(
+                            run,
+                          )}
+                        </strong>
 
                         <span
                           className={
-                            result.passed
+                            suitePassed
                               ? "regression-status-passed"
                               : "regression-status-failed"
                           }
                         >
-                          {result.passed
-                            ? "Passed"
-                            : "Failed"}
+                          {suitePassed
+                            ? "Suite Passed"
+                            : "Suite Failed"}
                         </span>
                       </div>
-                    ),
-                  )}
-                </div>
-              </article>
-            );
-          })}
-        </div>
+
+                      <div className="regression-history-provider">
+                        <strong>
+                          {formatProvider(
+                            run.provider,
+                          )}
+                        </strong>
+
+                        <span>
+                          {run.model}
+                        </span>
+                      </div>
+                    </div>
+
+                    <span className="regression-history-date">
+                      {formatDate(
+                        run.created_at,
+                      )}
+                    </span>
+                  </div>
+
+
+                  <div className="regression-history-summary">
+                    <div className="regression-history-stat">
+                      <span>
+                        Tests
+                      </span>
+
+                      <strong>
+                        {run.passed_tests}
+                        {" / "}
+                        {run.total_tests}
+                      </strong>
+
+                      <small>
+                        passed
+                      </small>
+                    </div>
+
+                    <div className="regression-history-stat">
+                      <span>
+                        Assertions
+                      </span>
+
+                      <strong>
+                        {run.passed_assertions}
+                        {" / "}
+                        {run.total_assertions}
+                      </strong>
+
+                      <small>
+                        passed
+                      </small>
+                    </div>
+
+                    <div className="regression-history-stat">
+                      <span>
+                        Failed Tests
+                      </span>
+
+                      <strong>
+                        {run.failed_tests}
+                      </strong>
+
+                      <small>
+                        total
+                      </small>
+                    </div>
+
+                    <div className="regression-history-stat">
+                      <span>
+                        Failed Assertions
+                      </span>
+
+                      <strong>
+                        {run.failed_assertions}
+                      </strong>
+
+                      <small>
+                        total
+                      </small>
+                    </div>
+                  </div>
+
+
+                  <div className="regression-history-settings">
+                    <div>
+                      <span>
+                        Temperature
+                      </span>
+
+                      <strong>
+                        {formatTemperature(
+                          run.temperature,
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        Max output tokens
+                      </span>
+
+                      <strong>
+                        {formatMaxTokens(
+                          run.max_output_tokens,
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        Suite ID
+                      </span>
+
+                      <strong>
+                        #{run.id}
+                      </strong>
+                    </div>
+                  </div>
+
+
+                  <div className="regression-history-results">
+                    <h4>
+                      Test Results
+                    </h4>
+
+                    {run.results.map(
+                      (result) => (
+                        <div
+                          key={result.id}
+                          className="regression-history-result"
+                        >
+                          <div className="regression-history-result-main">
+                            <span
+                              className={
+                                result.passed
+                                  ? "regression-result-icon regression-result-icon-passed"
+                                  : "regression-result-icon regression-result-icon-failed"
+                              }
+                              aria-hidden="true"
+                            >
+                              {result.passed
+                                ? "✓"
+                                : "✕"}
+                            </span>
+
+                            <div>
+                              <strong>
+                                {
+                                  result.test_case_name
+                                }
+                              </strong>
+
+                              <span>
+                                {
+                                  result.passed_count
+                                }
+                                {" / "}
+                                {
+                                  result.passed_count
+                                  + result.failed_count
+                                }
+                                {" assertions passed"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <span
+                            className={
+                              result.passed
+                                ? "regression-status-passed"
+                                : "regression-status-failed"
+                            }
+                          >
+                            {result.passed
+                              ? "Passed"
+                              : "Failed"}
+                          </span>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </>
       )}
     </section>
   );
